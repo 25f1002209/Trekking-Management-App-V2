@@ -27,10 +27,10 @@ class Staff(db.Model):
     name = db.Column(db.String(100), nullable=False)
     email = db.Column(db.String(100), unique=True, nullable=False)
     password = db.Column(db.String(100), nullable=False)
-    phone = db.Column(db.String(20), nullable=False)
+    contact = db.Column(db.String(20), nullable=False)
     experience = db.Column(db.String(200), nullable=True)
     specialization = db.Column(db.String(100), nullable=True)
-    status = db.Column(db.String(20), nullable=False, default='active')  # active or blacklisted
+    status = db.Column(db.String(20), nullable=False, default='Active')  # active or blacklisted
     assigned_trek = db.Column(db.Integer, db.ForeignKey(Trek.id), nullable=True)
 
 class Trekker(db.Model):
@@ -38,7 +38,7 @@ class Trekker(db.Model):
     name = db.Column(db.String(100), nullable=False)
     email = db.Column(db.String(100), unique=True, nullable=False)
     password = db.Column(db.String(100), nullable=False)
-    phone = db.Column(db.String(20), nullable=False)
+    contact = db.Column(db.String(20), nullable=False)
 
 class Booking(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
