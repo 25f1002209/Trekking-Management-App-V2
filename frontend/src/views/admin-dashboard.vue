@@ -1,38 +1,24 @@
 <template>
+  <div class="brand">
+    <div>
+        <h1>Treknologia</h1>
+        <h4>Explore the unexplored</h4>
+    </div>
+    <div style="align-content: center; margin-left: auto; margin-right: 80px; font-weight: 700; font-family: sans-serif; font-size: large;">{{ user.username }}</div>
+  </div>
   <div class="dashboard">
-
     <aside class="sidebar">
-      <div class="menu-icon" @click="toggleSidebar">☰</div>
-
       <div class="sidebar-menu">
-        <div
-          v-for="item in menuItems"
-          :key="item.name"
-          class="menu-item"
-          :class="{ active: activeMenu === item.name }"
-          @click="selectMenu(item)"
-        >
+        <div v-for="item in menuItems" :key="item.name" class="menu-item" :class="{ active: activeMenu === item.name }" @click="selectMenu(item)">
           <span class="menu-symbol">{{ item.icon }}</span>
           <span>{{ item.name }}</span>
         </div>
+        <div class="menu-item" style="margin-top: 230px;" @click="logout"><span class="menu-symbol">⇥</span><span>Logout</span></div>
       </div>
     </aside>
-
     <div class="main-section" :class="{ expanded: sidebarHidden }">
-
-      <header class="topbar">
-        <h3>Trekking Management Application</h3>
-
-        <div class="admin-profile">
-          <span class="profile-icon">♙</span>
-          <span>Admin</span>
-          <span>⌄</span>
-        </div>
-      </header>
-
       <main class="dashboard-content">
-        <h1>Dashboard {{ user.username }}</h1>
-
+        <h1>Welcome {{ user.username }}</h1>
         <div class="stats-container">
           <div class="stat-card">
             <div>
@@ -41,7 +27,6 @@
             </div>
             <span class="stat-icon">♧</span>
           </div>
-
           <div class="stat-card">
             <div>
               <h3>Total Users<br>(Trekkers)</h3>
@@ -89,12 +74,7 @@
                   <td>{{ booking.trek }}</td>
                   <td>{{ booking.date }}</td>
                   <td>
-                    <span
-                      class="status"
-                      :class="booking.status.toLowerCase()"
-                    >
-                      {{ booking.status }}
-                    </span>
+                    <span class="status" :class="booking.status.toLowerCase()">{{ booking.status }}</span>
                   </td>
                 </tr>
               </tbody>
@@ -124,30 +104,31 @@ export default {
       activeMenu: "Dashboard",
       user: {},
       totalTreks: 0,
-      totalUsers: 0,
-      totalStaff: 0,
+      totalTrekkers: 0,
+      totalStaffs: 0,
       totalBookings: 0,
 
       menuItems: [
-        { name: "Dashboard", icon: "⌂", path: "/admin-dashboard" },
-        { name: "Treks", icon: "♧", path: "/admin-treks" },
+        { name: "Dashboard", icon: "⌂", path: "/admin/dashboard" },
+        { name: "Treks", icon: "♧", path: "/admin/treks" },
         { name: "Trekking Staff", icon: "♙", path: "/admin/trekking-staff" },
-        { name: "Users (Trekkers)", icon: "♙", path: "/admin-users" },
-        { name: "Bookings", icon: "▦", path: "/admin-bookings" },
-        { name: "Search", icon: "⌕", path: "/admin-search" },
-        { name: "Reports", icon: "▤", path: "/admin-reports" },
-        { name: "Settings", icon: "⚙", path: "/admin-settings" },
-        { name: "Logout", icon: "⇥", path: "/" }
+        { name: "Trekkers", icon: "♙", path: "/admin/trekkers" },
+        { name: "Bookings", icon: "♘", path: "/admin/bookings" },
+        { name: "Reports", icon: "▤", path: "/admin/reports" }
       ],
 
       bookings: []
     };
   },
 
+  mounted() {
+    this.fetchDashboardData();
+  },
+
   methods: {
     async fetchDashboardData() {
       try {
-        const response = await axios.get("http://localhost:5000/api/admin-dashboard", {
+        const response = await axios.get("http://localhost:5000/api/admin/dashboard", {
             headers: {
                 "Authorization": `Bearer ${localStorage.getItem("token")}`
             },
@@ -169,22 +150,21 @@ export default {
       }
     },
 
-    toggleSidebar() {
-      this.sidebarHidden = !this.sidebarHidden;
+    logout() {
+      localStorage.removeItem("token");
+      this.$router.push("/");
     },
 
     selectMenu(item) {
       this.activeMenu = item.name;
 
-      if (item.name === "Logout") {
-        this.$router.push("/");
-      } else if (item.path !== this.$route.path) {
+      if (item.path !== this.$route.path) {
         this.$router.push(item.path);
       }
     },
 
     viewAllBookings() {
-      this.$router.push("/admin-bookings");
+      this.$router.push("/admin/bookings");
     }
   }
 };
@@ -193,6 +173,48 @@ export default {
 <style scoped>
 * {
     box-sizing: border-box;
+}
+
+.brand {
+    top: 0;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding: 5px 0px;
+    background: rgba(184, 214, 250, 0.9);
+    border-bottom: 1px solid rgba(8, 8, 8, 0.25);
+}
+
+.brand h1 {
+    margin: 0;
+    font-size: 30px;
+    padding: 0px 30px;
+    font-weight: bold;
+    font-family:Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
+    color: #00027f;
+    text-align: left;
+}
+.brand h4 {
+    margin: 0;
+    font-size: 15px;
+    padding: 0px 35px;
+    font-weight: bold;
+    font-family: Arial, Helvetica, sans-serif;
+    font-style: italic;
+    color: #00027f;
+    text-align: left;
+}
+
+.btn {
+    padding: 5px 10px;
+    text-decoration: none;
+    border: 2px solid;
+    background-color: #af8523;
+    color: black;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    border-radius: 4px;
 }
 
 .dashboard {
@@ -205,16 +227,16 @@ export default {
 }
 
 .sidebar {
-    width: 205px;
+    width: 240px;
     min-width: 205px;
     min-height: 100vh;
     border-right: 2px solid #e2e8f0;
-    background: #ffffff;
-    transition: width 0.2s ease;
+    background: #0050c0;
+    padding: 10px 12px;
 }
 
 .menu-icon {
-    height: 65px;
+    height: 55px;
     display: flex;
     align-items: center;
     padding: 0 25px;
@@ -224,7 +246,7 @@ export default {
 }
 
 .sidebar-menu {
-    padding: 14px 5px;
+    padding: 10px 5px;
 }
 
 .menu-item {
@@ -232,27 +254,27 @@ export default {
     align-items: center;
     gap: 13px;
     padding: 14px 12px;
-    margin-bottom: 5px;
+    margin-bottom: 15px;
     border-radius: 8px;
-    font-size: 14px;
+    font-size: 20px;
     font-weight: 600;
     cursor: pointer;
-    transition: background 0.2s ease;
+    color:#cbd5e1;
 }
 
 .menu-item:hover {
-    background: #f1f5f9;
+    background: #add6ff;
+    color: #0b58f0;
 }
 
 .menu-item.active {
     color: #155eef;
     background: #e8f0ff;
 }
-
 .menu-symbol {
     width: 23px;
     text-align: center;
-    font-size: 22px;
+    font-size: 21px;
     flex-shrink: 0;
 }
 
@@ -266,7 +288,7 @@ export default {
 }
 
 .topbar {
-    height: 65px;
+    height: 55px;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -369,18 +391,18 @@ table {
 }
 
 thead {
-    background: #f3f4f6;
+    background: #c5e7ff;
 }
 
 th {
-    padding: 16px 14px;
-    font-size: 14px;
+    padding: 13px 9px;
+    font-size: 15px;
     font-weight: 700;
 }
 
 td {
-    padding: 17px 14px;
-    font-size: 15px;
+    padding: 12px 9px;
+    font-size: 12px;
     border-top: 1px solid #e2e8f0;
 }
 
@@ -475,7 +497,7 @@ tbody tr:hover {
     }
 
     .dashboard-content h1 {
-        font-size: 23px;
+        font-size: 30px;
     }
 
     .stats-container {

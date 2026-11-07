@@ -9,6 +9,7 @@ class Admin(db.Model):
     username = db.Column(db.String(100), unique=True, nullable=False)
     password = db.Column(db.String(100), nullable=False)
     email=db.Column(db.String(100), nullable=False)
+    status = db.Column(db.String(20), nullable=False, default='Active')  # active or blacklisted
 
 class Trek(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
@@ -21,24 +22,31 @@ class Trek(db.Model):
     photo = db.Column(db.String(255), nullable=True)
     status = db.Column(db.String(20), nullable=False, default='active')  # active or closed
     available_slots = db.Column(db.Integer, nullable=False)
-    
+
 class Staff(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     name = db.Column(db.String(100), nullable=False)
+    username = db.Column(db.String(100), unique=True, nullable=False)
     email = db.Column(db.String(100), unique=True, nullable=False)
     password = db.Column(db.String(100), nullable=False)
     contact = db.Column(db.String(20), nullable=False)
     experience = db.Column(db.String(200), nullable=True)
     specialization = db.Column(db.String(100), nullable=True)
     status = db.Column(db.String(20), nullable=False, default='Active')  # active or blacklisted
-    assigned_trek = db.Column(db.Integer, db.ForeignKey(Trek.id), nullable=True)
+
+class TrekStaff(db.Model):
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    trek_id = db.Column(db.Integer, db.ForeignKey(Trek.id), nullable=False)
+    staff_id = db.Column(db.Integer, db.ForeignKey(Staff.id), nullable=False)
 
 class Trekker(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     name = db.Column(db.String(100), nullable=False)
+    username = db.Column(db.String(100), unique=True, nullable=False)
     email = db.Column(db.String(100), unique=True, nullable=False)
     password = db.Column(db.String(100), nullable=False)
     contact = db.Column(db.String(20), nullable=False)
+    status = db.Column(db.String(20), nullable=False, default='Active')  # active or blacklisted
 
 class Booking(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)

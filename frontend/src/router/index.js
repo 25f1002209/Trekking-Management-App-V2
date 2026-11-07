@@ -5,14 +5,20 @@ import StaffDashboard from '../views/staff-dashboard.vue'
 import TrekkerDashboard from '../views/trekker-dashboard.vue'
 import AdminManageTrekkingStaff from '../components/admin-trekking-staff.vue'
 import TrekkerRegistration from '../components/trekker-registration.vue'
+import AdminManageTrekkers from '../components/admin-trekkers.vue'
+import AdminManageTreks from '../components/admin-treks.vue'
+import AdminManageBookings from '../components/admin-bookings.vue'
 
 const routes = [
   {path: '/', name: 'Home', component: home},
-  {path: '/admin-dashboard', name: 'AdminDashboard', component: AdminDashboard},
+  {path: '/admin/dashboard', name: 'AdminDashboard', component: AdminDashboard},
   {path: '/staff-dashboard', name: 'StaffDashboard', component: StaffDashboard},
   {path: '/trekker-dashboard', name: 'TrekkerDashboard', component: TrekkerDashboard},
   {path: '/admin/trekking-staff', name: 'AdminManageTrekkingStaff', component: AdminManageTrekkingStaff},
-  {path: '/trekker-registration', name: 'TrekkerRegistration', component: TrekkerRegistration}
+  {path: '/trekker/registration', name: 'TrekkerRegistration', component: TrekkerRegistration},
+  {path: '/admin/trekkers', name: 'AdminManageTrekkers', component: AdminManageTrekkers},
+  {path: '/admin/treks', name: 'AdminManageTreks', component: AdminManageTreks},
+  {path: '/admin/bookings', name: 'AdminManageBookings', component: AdminManageBookings}
 ]
 
 const router = createRouter({history: createWebHistory(), routes})

@@ -1,54 +1,29 @@
 <template>
+  <div class="brand">
+    <div>
+        <h1>Treknologia</h1>
+        <h4>Explore the unexplored</h4>
+    </div>
+    <div style="align-content: center; margin-left: auto; margin-right: 80px; font-weight: 700; font-family: sans-serif; font-size: large;">{{ admin.username }}</div>
+  </div>
   <div class="dashboard">
-
     <aside class="sidebar">
-      <div class="menu-icon">☰</div>
-
       <div class="sidebar-menu">
-        <div
-          v-for="item in menuItems"
-          :key="item.name"
-          class="menu-item"
-          :class="{ active: activeMenu === item.name }"
-          @click="selectMenu(item)"
-        >
+        <div v-for="item in menuItems" :key="item.name" class="menu-item" :class="{ active: activeMenu === item.name }" @click="selectMenu(item)">
           <span class="menu-symbol">{{ item.icon }}</span>
           <span>{{ item.name }}</span>
         </div>
+        <div class="menu-item" style="margin-top: 230px;" @click="logout"><span class="menu-symbol">⇥</span><span>Logout</span></div>
       </div>
     </aside>
-
     <div class="main-section">
-
-      <header class="topbar">
-        <h3>Trekking Management Application</h3>
-
-        <div class="admin-profile">
-          <span class="profile-icon">♙</span>
-          <span>{{ admin.username }}</span>
-          <span>⌄</span>
-        </div>
-      </header>
-
       <main class="dashboard-content">
-
-        <!-- TREKKING STAFF LIST -->
         <template v-if="!showForm">
-
           <div class="page-heading">
             <h1>Trekking Staff List</h1>
-            <button class="create-button" @click="openForm">
-              + Create New Staff
-            </button>
+            <button class="create-button" @click="openForm"> + Create New Staff</button>
           </div>
-
-          <input
-            class="search-box"
-            v-model="search"
-            type="text"
-            placeholder="Search trekking staff..."
-          />
-
+          <input class="search-box" v-model="search" type="text" placeholder="Search trekking staff..."/>
           <div class="table-container">
             <table>
               <thead>
@@ -61,147 +36,60 @@
                   <th>Action</th>
                 </tr>
               </thead>
-
               <tbody>
                 <tr v-for="staff in filteredStaff" :key="staff.id">
                   <td>{{ staff.id }}</td>
                   <td>{{ staff.name }}</td>
                   <td>{{ staff.email }}</td>
                   <td>{{ staff.contact }}</td>
+                  <td><span class="status" :class="staff.status">{{ staff.status }}</span></td>
                   <td>
-                    <span
-                      class="status"
-                      :class="staff.status.toLowerCase()"
-                    >
-                      {{ staff.status }}
-                    </span>
-                  </td>
-                  <td>
-                    <button
-                      v-if="staff.status === 'Active'"
-                      class="action-button block-button"
-                      @click="changeStatus(staff)"
-                    >
-                      Blacklist
-                    </button>
-
-                    <button
-                      v-else
-                      class="action-button whitelist-button"
-                      @click="changeStatus(staff)"
-                    >
-                      Whitelist
-                    </button>
+                    <button v-if="staff.status === 'Active'" class="action-button block-button" @click="changeStatus(staff)">Blacklist</button>
+                    <button v-else class="action-button whitelist-button" @click="changeStatus(staff)">Whitelist</button>
                   </td>
                 </tr>
-
                 <tr v-if="filteredStaff.length === 0">
-                  <td colspan="6" class="empty-message">
-                    No trekking staff found.
-                  </td>
+                  <td colspan="6" class="empty-message">No trekking staff found.</td>
                 </tr>
               </tbody>
             </table>
           </div>
-
           <div class="notice">
             <span class="notice-icon">ⓘ</span>
             <p>Blacklisted staff cannot login or access the system.</p>
           </div>
-
         </template>
-
-        <!-- CREATE NEW TREKKING STAFF FORM -->
         <template v-else>
-
           <h1>Create New Trekking Staff</h1>
-
           <form class="staff-form" @submit.prevent="createStaff">
-
             <div class="form-grid">
-              <input
-                v-model="form.name"
-                type="text"
-                placeholder="Full Name"
-                required
-              />
-
-              <input
-                v-model="form.email"
-                type="email"
-                placeholder="Email Address"
-                required
-              />
-
-              <input
-                v-model="form.contact"
-                type="text"
-                placeholder="Contact Number"
-                required
-              />
-
-              <input
-                v-model="form.password"
-                type="password"
-                placeholder="Password"
-                required
-              />
-
-              <input
-                v-model="form.confirmPassword"
-                type="password"
-                placeholder="Confirm Password"
-                required
-              />
-
-              <input
-                v-model="form.experience"
-                type="text"
-                placeholder="Experience (e.g., 5 years)"
-              />
-
-              <input
-                v-model="form.specialization"
-                type="text"
-                placeholder="Specialization (e.g., High Altitude, First Aid)"
-                class="full-width"
-              />
+              <input v-model="form.name" type="text" placeholder="Full Name" required/>
+              <input v-model="form.username" type="text" placeholder="Username" required/>
+              <input v-model="form.email" type="email" placeholder="Email Address" required/>
+              <input v-model="form.contact" type="text" placeholder="Contact Number" required/>
+              <input v-model="form.password" type="password" placeholder="Password" required/>
+              <input v-model="form.confirmPassword" type="password" placeholder="Confirm Password" required/>
+              <input v-model="form.experience" type="text" placeholder="Experience (e.g., 5 years)"/>
+              <input v-model="form.specialization" type="text" placeholder="Specialization (e.g., High Altitude, First Aid)" class="full-width"/>
             </div>
-
             <div class="status-row">
               <label for="staff-status">Status</label>
-
               <select id="staff-status" v-model="form.status">
                 <option>Active</option>
                 <option>Blacklisted</option>
               </select>
             </div>
-
             <p v-if="error" class="form-error">{{ error }}</p>
-
             <div class="form-actions">
-              <button
-                type="button"
-                class="cancel-button"
-                @click="closeForm"
-              >
-                Cancel
-              </button>
-
-              <button type="submit" class="create-button">
-                Create Staff
-              </button>
+              <button type="button" class="cancel-button" @click="closeForm">Cancel</button>
+              <button type="submit" class="create-button">Create Staff</button>
             </div>
-
           </form>
-
           <div class="notice">
             <span class="notice-icon">ⓘ</span>
             <p>The staff will receive email with login credentials.</p>
           </div>
-
         </template>
-
       </main>
     </div>
   </div>
@@ -219,16 +107,14 @@ export default {
       activeMenu: "Trekking Staff",
       error: "",
       menuItems: [
-        { name: "Dashboard", icon: "⌂", path: "/admin-dashboard" },
-        { name: "Treks", icon: "♧", path: "/admin-treks" },
-        { name: "Trekking Staff", icon: "♙", path: "/admin-staff" },
-        { name: "Users (Trekkers)", icon: "♙", path: "/admin-users" },
-        { name: "Search", icon: "⌕", path: "/admin-search" },
-        { name: "Reports", icon: "▤", path: "/admin-reports" },
-        { name: "Settings", icon: "⚙", path: "/admin-settings" },
-        { name: "Logout", icon: "⇥", path: "/" }
+        { name: "Dashboard", icon: "⌂", path: "/admin/dashboard" },
+        { name: "Treks", icon: "♧", path: "/admin/treks" },
+        { name: "Trekking Staff", icon: "♙", path: "/admin/trekking-staff" },
+        { name: "Trekkers", icon: "♙", path: "/admin/trekkers" },
+        { name: "Bookings", icon: "♘", path: "/admin/bookings" },
+        { name: "Reports", icon: "▤", path: "/admin/reports" }
       ],
-      form: {name: "", email: "", contact: "", password: "", confirmPassword: "", experience: "", specialization: "", status: "Active"},
+      form: {name: "", username: "", email: "", contact: "", password: "", confirmPassword: "", experience: "", specialization: "", status: "Active"},
       staffList: [],
       admin: {username: "Admin", email: ""}
     };
@@ -243,7 +129,7 @@ export default {
         staff.name.toLowerCase().includes(value) ||
         staff.email.toLowerCase().includes(value) ||
         staff.contact.includes(value) ||
-        staff.status.toLowerCase().includes(value)
+        staff.status.includes(value)
       );
     }
   },
@@ -295,6 +181,7 @@ export default {
 
       this.form = {
         name: "",
+        username: "",
         email: "",
         contact: "",
         password: "",
@@ -318,6 +205,7 @@ export default {
                 "http://localhost:5000/api/admin/trekking-staff",
                 {
                     name: this.form.name,
+                    username: this.form.username,
                     email: this.form.email,
                     password: this.form.password,
                     contact: this.form.contact,
@@ -345,17 +233,31 @@ export default {
         }
     },
 
-    changeStatus(staff) {
-      staff.status = staff.status === "Active" ? "Blacklisted" : "Active";
+    async changeStatus(staff) {
+      const newStatus = staff.status === "Active" ? "Blacklisted" : "Active";
+      try {
+        const response = await axios.put(`http://localhost:5000/api/admin/trekking-staff/${staff.id}/status`,
+          {status: newStatus },
+          {headers: {Authorization: `Bearer ${localStorage.getItem("token")}`}}
+        );
+        if (response.data.success) {
+          staff.status = newStatus;
+        }
+      } catch (error) {
+        console.error("Change status error:", error.response?.data || error);
+        this.error = error.response?.data?.message || "Failed to change staff status.";
+      }
+    },
+
+    logout() {
+      localStorage.removeItem("token");
+      this.$router.push("/");
     },
 
     selectMenu(item) {
       this.activeMenu = item.name;
 
-      if (item.name === "Logout") {
-        localStorage.removeItem("token");
-        this.$router.push("/");
-      } else if (item.path !== this.$route.path) {
+      if (item.path !== this.$route.path) {
         this.$router.push(item.path);
       }
     }
@@ -364,8 +266,47 @@ export default {
 </script>
 
 <style scoped>
-* {
-    box-sizing: border-box;
+* {box-sizing: border-box;}
+.brand {
+    top: 0;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding: 5px 0px;
+    background: rgba(184, 214, 250, 0.9);
+    border-bottom: 1px solid rgba(8, 8, 8, 0.25);
+}
+
+.brand h1 {
+    margin: 0;
+    font-size: 30px;
+    padding: 0px 30px;
+    font-weight: bold;
+    font-family:Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
+    color: #00027f;
+    text-align: left;
+}
+.brand h4 {
+    margin: 0;
+    font-size: 15px;
+    padding: 0px 35px;
+    font-weight: bold;
+    font-family: Arial, Helvetica, sans-serif;
+    font-style: italic;
+    color: #00027f;
+    text-align: left;
+}
+
+.btn {
+    padding: 5px 10px;
+    text-decoration: none;
+    border: 2px solid;
+    background-color: #af8523;
+    color: black;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    border-radius: 4px;
 }
 
 .dashboard {
@@ -378,15 +319,16 @@ export default {
 }
 
 .sidebar {
-    width: 205px;
+    width: 240px;
     min-width: 205px;
     min-height: 100vh;
     border-right: 2px solid #e2e8f0;
-    background: #ffffff;
+    background: #0050c0;
+    padding: 10px 12px;
 }
 
 .menu-icon {
-    height: 65px;
+    height: 55px;
     display: flex;
     align-items: center;
     padding: 0 25px;
@@ -395,7 +337,7 @@ export default {
 }
 
 .sidebar-menu {
-    padding: 14px 5px;
+    padding: 10px 5px;
 }
 
 .menu-item {
@@ -403,15 +345,17 @@ export default {
     align-items: center;
     gap: 13px;
     padding: 14px 12px;
-    margin-bottom: 5px;
+    margin-bottom: 15px;
     border-radius: 8px;
-    font-size: 14px;
+    font-size: 20px;
     font-weight: 600;
     cursor: pointer;
+    color:#cbd5e1;
 }
 
 .menu-item:hover {
-    background: #f1f5f9;
+    background: #add6ff;
+    color: #0b58f0;
 }
 
 .menu-item.active {
@@ -432,7 +376,7 @@ export default {
 }
 
 .topbar {
-    height: 65px;
+    height: 55px;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -472,7 +416,7 @@ export default {
 
 .dashboard-content h1 {
     margin: 0 0 22px;
-    font-size: 21px;
+    font-size: 30px;
     font-weight: 700;
 }
 
@@ -533,12 +477,12 @@ table {
 }
 
 thead {
-    background: #f3f4f6;
+    background: #c5e7ff;
 }
 
 th {
     padding: 13px 9px;
-    font-size: 12px;
+    font-size: 15px;
     font-weight: 700;
 }
 
@@ -561,13 +505,13 @@ tbody tr:hover {
     font-weight: 600;
 }
 
-.status.active {
+.status.Active {
     border-color: #86d5a8;
     color: #15803d;
     background: #f0fdf4;
 }
 
-.status.blacklisted {
+.status.Blacklisted {
     border-color: #fca5a5;
     color: #dc2626;
     background: #fef2f2;
@@ -615,7 +559,7 @@ tbody tr:hover {
     padding: 15px;
     border: 1px solid #b7d0ff;
     border-radius: 7px;
-    background: #f4f7ff;
+    background: #dfecf3;
 }
 
 .notice-icon {

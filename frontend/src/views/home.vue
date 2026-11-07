@@ -3,7 +3,10 @@
     <div class="login-card">
       <div class="left-panel">
         <div class="brand">
-          <h1>Treknologia</h1>
+          <div>
+                <h1>Treknologia</h1>
+                <h4>Explore the unexplored</h4>
+            </div>
         </div>
 
         <div class="roles-section">
@@ -50,7 +53,7 @@
               <circle cx="12" cy="8" r="4" />
               <path d="M5 21v-2a7 7 0 0 1 14 0v2H5Z" />
             </svg>
-            <input v-model="email" type="email" placeholder="Email address" required />
+            <input v-model="username" type="text" placeholder="Username" required />
           </label>
 
           <label class="input-field">
@@ -101,7 +104,7 @@ export default {
 
   data() {
     return {
-      email: "",
+      username: "",
       password: "",
       rememberMe: false,
       selectedRole: "Admin"
@@ -111,7 +114,7 @@ export default {
   methods: {
     selectRole(role) {
       this.selectedRole = role;
-      this.email = "";
+      this.username = "";
       this.password = "";
       this.rememberMe = false;
     },
@@ -120,7 +123,7 @@ export default {
             const response = await axios.post(
                 "http://127.0.0.1:5000/api/login",
                 {
-                    email: this.email,
+                    username: this.username,
                     password: this.password,
                     role: this.selectedRole
                 }
@@ -132,17 +135,17 @@ export default {
                     localStorage.setItem("token", response.data.token);
                     alert('Login successful!')
                     this.$emit('logged-in')
-                    this.$router.push("/admin-dashboard");
+                    this.$router.push("/admin/dashboard");
                 } else if (response.data.role === "Staff") {
                     localStorage.setItem("token", response.data.token);
                     alert('Login successful!')
                     this.$emit('logged-in')
-                    this.$router.push("/staff-dashboard");
+                    this.$router.push("/staff/dashboard");
                 } else if (response.data.role === "Trekker") {
                     localStorage.setItem("token", response.data.token);
                     alert('Login successful!')
                     this.$emit('logged-in')
-                    this.$router.push("/trekker-dashboard");
+                    this.$router.push("/trekker/dashboard");
                 }
             }
         } catch (error) {
@@ -154,7 +157,7 @@ export default {
     },
 
     register() {
-      this.$router.push("/trekker-registration");
+      this.$router.push("/trekker/registration");
     }
   }
 };
@@ -232,8 +235,8 @@ export default {
     display: flex;
     align-items: center;
     justify-content: left;
-    padding: 12px 30px;
-    background: rgba(255, 255, 255, 0.90);
+    padding: 5px 30px;
+    background: rgba(184, 214, 250, 0.9);
     border-bottom: 1px solid rgba(255, 255, 255, 0.25);
     backdrop-filter: blur(2px);
     z-index: 5;
@@ -241,11 +244,22 @@ export default {
 
 .brand h1 {
     margin: 0;
-    font-size: 26px;
+    font-size: 30px;
     padding: 0px 30px;
     font-weight: bold;
-    color: #000000;
-    text-align: center;
+    font-family:Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
+    color: #00027f;
+    text-align: left;
+}
+.brand h4 {
+    margin: 0;
+    font-size: 15px;
+    padding: 0px 35px;
+    font-weight: bold;
+    font-family: Arial, Helvetica, sans-serif;
+    font-style: italic;
+    color: #00027f;
+    text-align: left;
 }
 
 .roles-section {
@@ -257,7 +271,7 @@ export default {
     max-width: 100%;
     padding: 12px;
     border-radius: 10px;
-    background: rgba(255, 255, 255, 0.92);
+    background: rgba(184, 214, 250, 0.9);
     backdrop-filter: blur(3px);
 }
 
@@ -325,7 +339,7 @@ export default {
     padding: 30px 28px 24px;
     border: 2px solid rgba(212, 219, 229, 0.95);
     border-radius: 13px;
-    background: rgba(255, 255, 255, 0.88);
+    background: rgba(184, 214, 250, 0.9);
     box-shadow: 0 8px 28px rgba(15, 23, 42, 0.12);
     backdrop-filter: blur(4px);
 }
