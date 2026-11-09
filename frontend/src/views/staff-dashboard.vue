@@ -1,50 +1,27 @@
 <template>
+  <div class="brand">
+    <div>
+        <h1>Treknologia</h1>
+        <h4>Explore the unexplored</h4>
+    </div>
+    <div class="admin-profile"><div class="profile-icon">👤</div><span>{{ user.name }}</span></div>
+  </div>
   <div class="dashboard">
-
     <aside class="sidebar">
-      <div class="menu-icon" @click="toggleSidebar">☰</div>
-
       <div class="sidebar-menu">
-        <div
-          v-for="item in menuItems"
-          :key="item.name"
-          class="menu-item"
-          :class="{ active: activeMenu === item.name }"
-          @click="selectMenu(item)"
-        >
+        <div v-for="item in menuItems" :key="item.name" class="menu-item" :class="{ active: activeMenu === item.name }" @click="selectMenu(item)">
           <span class="menu-symbol">{{ item.icon }}</span>
           <span>{{ item.name }}</span>
         </div>
+        <div class="menu-item" style="margin-top: 370px;" @click="logout"><span class="menu-symbol">⇥</span><span>Logout</span></div>
       </div>
     </aside>
-
     <div class="main-section" :class="{ expanded: sidebarHidden }">
-
-      <header class="topbar">
-        <h3>Trekking Management Application</h3>
-
-        <div class="staff-profile">
-          <span class="profile-icon">♙</span>
-          <span>{{ user.username || "Trekking Staff" }}</span>
-          <span>⌄</span>
-        </div>
-      </header>
-
       <main class="dashboard-content">
-        <h1>My Dashboard</h1>
-
-        <div v-if="loading" class="message">
-          Loading dashboard...
-        </div>
-
-        <div v-else-if="error" class="error-message">
-          {{ error }}
-          <button @click="fetchDashboardData">Retry</button>
-        </div>
-
-        <template v-else>
+        <h1>Welcome {{ user.name }}</h1>
+        <div v-if="loading" class="message">Loading dashboard...</div>
+        <div v-else-if="error" class="error-message">{{ error }}<button @click="fetchDashboardData">Retry</button></div>
           <div class="stats-container">
-
             <div class="stat-card">
               <div>
                 <h3>Assigned Treks</h3>
@@ -52,7 +29,6 @@
               </div>
               <span class="stat-icon">▦</span>
             </div>
-
             <div class="stat-card">
               <div>
                 <h3>Total Participants</h3>
@@ -60,7 +36,6 @@
               </div>
               <span class="stat-icon">♙</span>
             </div>
-
             <div class="stat-card">
               <div>
                 <h3>Ongoing Treks</h3>
@@ -68,60 +43,40 @@
               </div>
               <span class="stat-icon">♧</span>
             </div>
-
           </div>
-
           <section class="treks-section">
-            <h2>My Assigned Treks</h2>
-
+            <h2>Recent Treks</h2>
             <div class="table-container">
-              <table>
-                <thead>
-                  <tr>
-                    <th>Trek Name</th>
-                    <th>Dates</th>
-                    <th>Participants</th>
-                    <th>Slots</th>
-                    <th>Status</th>
-                    <th>Action</th>
-                  </tr>
-                </thead>
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Trek Name</th>
+                      <th>Location</th>
+                      <th>Dates</th>
+                      <th>Participants</th>
+                      <th>Slots</th>
+                      <th>Status</th>
+                    </tr>
+                  </thead>
 
-                <tbody>
-                  <tr v-for="trek in treks" :key="trek.id">
-                    <td>{{ trek.name }}</td>
-                    <td>{{ trek.dates }}</td>
-                    <td>{{ trek.participants }}</td>
-                    <td>{{ trek.slots }}</td>
-                    <td>
-                      <span
-                        class="status"
-                        :class="trek.status.toLowerCase()"
-                      >
-                        {{ trek.status }}
-                      </span>
-                    </td>
-                    <td>
-                      <button
-                        class="action-button"
-                        @click="manageTrek(trek)"
-                      >
-                        {{ trek.status === "Closed" ? "View" : "Manage" }}
-                      </button>
-                    </td>
-                  </tr>
-
-                  <tr v-if="treks.length === 0">
-                    <td colspan="6" class="empty-message">
-                      No assigned treks found.
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
+                  <tbody>
+                    <tr v-for="trek in treks" :key="trek.id">
+                      <td>{{ trek.name }}</td>
+                      <td>{{ trek.location }}</td>
+                      <td>{{ trek.start_date }}.  to  .{{ trek.end_date }}</td>
+                      <td>{{ trek.participants }}</td>
+                      <td>{{ trek.slots }}</td>
+                      <td>
+                        <span class="status" :class="trek.status">{{ trek.status }}</span>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+              <div class="view-all">
+                <button @click="viewAllTreks">View All Treks <span>→</span></button>
+              </div>
           </section>
-        </template>
-
       </main>
     </div>
   </div>
@@ -139,23 +94,16 @@ export default {
       activeMenu: "Dashboard",
       loading: false,
       error: "",
-
-      user: {
-        username: ""
-      },
-
+      user: {name: ""},
       assignedTreks: 0,
       totalParticipants: 0,
       ongoingTreks: 0,
-
       treks: [],
-
       menuItems: [
-        { name: "Dashboard", icon: "⌂", path: "/staff-dashboard" },
-        { name: "My Treks", icon: "♧", path: "/staff-treks" },
-        { name: "Participants", icon: "♙", path: "/staff-participants" },
-        { name: "Profile", icon: "♙", path: "/staff-profile" },
-        { name: "Logout", icon: "⇥", path: "/" }
+        { name: "Dashboard", icon: "⌂", path: "/staff/dashboard" },
+        { name: "My Treks", icon: "♧", path: "/staff/treks" },
+        { name: "Participants", icon: "♙", path: "/staff/participants" },
+        { name: "Profile", icon: "♙", path: "/staff/profile" },
       ]
     };
   },
@@ -168,19 +116,11 @@ export default {
     async fetchDashboardData() {
       this.loading = true;
       this.error = "";
-
       try {
-        const response = await axios.get(
-          "http://localhost:5000/api/staff-dashboard",
-          {
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem("token")}`
-            }
-          }
+        const response = await axios.get("http://localhost:5000/api/staff/dashboard",
+          {headers: { Authorization: `Bearer ${localStorage.getItem("token")}`}}
         );
-
         const data = response.data;
-
         if (data.success) {
           this.user = data.user || { username: "" };
           this.assignedTreks = data.assigned_treks;
@@ -194,47 +134,77 @@ export default {
         if (error.response && error.response.status === 401) {
           this.error = "Your session has expired. Please log in again.";
         } else {
-          this.error =
-            error.response?.data?.message ||
-            "Unable to load dashboard. Check your backend.";
+          this.error = error.response?.data?.message || "Unable to load dashboard. Check your backend.";
         }
-
         console.error("Dashboard error:", error);
       } finally {
         this.loading = false;
       }
     },
-
-    toggleSidebar() {
-      this.sidebarHidden = !this.sidebarHidden;
-    },
-
     selectMenu(item) {
       this.activeMenu = item.name;
-
-      if (item.name === "Logout") {
-        localStorage.removeItem("token");
-        this.$router.push("/");
-      } else if (item.path !== this.$route.path) {
+      if (item.path !== this.$route.path) {
         this.$router.push(item.path);
       }
     },
-
-    manageTrek(trek) {
-      this.$router.push({
-        path: "/staff-manage-trek",
-        query: { id: trek.id }
-      });
+    logout() {
+      localStorage.removeItem("token");
+      this.$router.push("/");
+    },
+    viewAllTreks() {
+      this.$router.push("/staff/treks");
     }
   }
 };
 </script>
 
 <style scoped>
-* {
-    box-sizing: border-box;
+* {box-sizing: border-box;}
+.brand {
+    top: 0;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding: 5px 0px;
+    background: rgba(184, 214, 250, 0.9);
+    border-bottom: 1px solid rgba(8, 8, 8, 0.25);
 }
-
+.brand h1 {
+    margin: 0;
+    font-size: 30px;
+    padding: 0px 30px;
+    font-weight: bold;
+    font-family:Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
+    color: #00027f;
+    text-align: left;
+}
+.brand h4 {
+    margin: 0;
+    font-size: 15px;
+    padding: 0px 35px;
+    font-weight: bold;
+    font-family: Arial, Helvetica, sans-serif;
+    font-style: italic;
+    color: #00027f;
+    text-align: left;
+}
+.admin-profile {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 14px;
+    align-content: center; margin-left: auto; margin-right: 80px; font-weight: 700; font-family: sans-serif; font-size: large;
+}
+.profile-icon {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid #540084;
+    border-radius: 50%;
+    font-size: 24px;
+}
 .dashboard {
     display: flex;
     width: 100%;
@@ -243,18 +213,16 @@ export default {
     color: #111827;
     background: #ffffff;
 }
-
 .sidebar {
-    width: 205px;
+    width: 240px;
     min-width: 205px;
     min-height: 100vh;
     border-right: 2px solid #e2e8f0;
-    background: #ffffff;
-    transition: width 0.2s ease;
+    background: #0050c0;
+    padding: 10px 12px;
 }
-
 .menu-icon {
-    height: 65px;
+    height: 55px;
     display: flex;
     align-items: center;
     padding: 0 25px;
@@ -262,61 +230,39 @@ export default {
     font-size: 25px;
     cursor: pointer;
 }
-
 .sidebar-menu {
-    padding: 14px 5px;
+    padding: 10px 5px;
 }
-
 .menu-item {
     display: flex;
     align-items: center;
     gap: 13px;
     padding: 14px 12px;
-    margin-bottom: 5px;
+    margin-bottom: 15px;
     border-radius: 8px;
-    font-size: 14px;
+    font-size: 20px;
     font-weight: 600;
     cursor: pointer;
-    transition: background 0.2s ease;
+    color:#cbd5e1;
 }
-
 .menu-item:hover {
-    background: #f1f5f9;
+    background: #add6ff;
+    color: #0b58f0;
 }
-
 .menu-item.active {
     color: #155eef;
     background: #e8f0ff;
 }
-
 .menu-symbol {
     width: 23px;
     text-align: center;
-    font-size: 22px;
+    font-size: 21px;
     flex-shrink: 0;
 }
-
 .main-section {
     flex: 1;
     min-width: 0;
 }
-
-.topbar {
-    height: 65px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 25px;
-    border-bottom: 2px solid #e2e8f0;
-    background: #ffffff;
-}
-
-.topbar h3 {
-    margin: 0;
-    font-size: 16px;
-    font-weight: 700;
-}
-
 .staff-profile {
     display: flex;
     align-items: center;
@@ -324,28 +270,14 @@ export default {
     font-size: 14px;
     font-weight: 600;
 }
-
-.profile-icon {
-    width: 32px;
-    height: 32px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border: 2px solid #cbd5e1;
-    border-radius: 50%;
-    font-size: 24px;
-}
-
 .dashboard-content {
     padding: 25px 22px;
 }
-
 .dashboard-content h1 {
     margin: 0 0 27px;
     font-size: 28px;
     font-weight: 700;
 }
-
 .stats-container {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -354,7 +286,7 @@ export default {
 }
 
 .stat-card {
-    min-height: 100px;
+    min-height: 140px;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -368,25 +300,25 @@ export default {
 
 .stat-card h3 {
     margin: 0 0 12px;
-    font-size: 14px;
+    font-size: 15px;
     line-height: 1.4;
     font-weight: 700;
 }
 
 .stat-card p {
     margin: 0;
-    font-size: 30px;
+    font-size: 31px;
     font-weight: 700;
 }
 
 .stat-icon {
-    font-size: 32px;
+    font-size: 38px;
     color: #111827;
 }
 
 .treks-section h2 {
     margin: 0 0 18px;
-    font-size: 20px;
+    font-size: 21px;
     font-weight: 700;
 }
 
@@ -405,7 +337,7 @@ table {
 }
 
 thead {
-    background: #f3f4f6;
+    background: #c5e7ff;
 }
 
 th {
@@ -415,8 +347,8 @@ th {
 }
 
 td {
-    padding: 14px 10px;
-    font-size: 13px;
+    padding: 12px 9px;
+    font-size: 12px;
     border-top: 1px solid #e2e8f0;
 }
 
@@ -428,29 +360,15 @@ tbody tr:hover {
     font-weight: 600;
 }
 
-.status.open {
+.status.Open {
     color: #15803d;
 }
-
-.status.closed {
+.status.Upcoming {
+    color: #f97316;
+}
+.status.Closed {
     color: #dc2626;
 }
-
-.action-button {
-    padding: 8px 13px;
-    border: 1px solid #93b4ff;
-    border-radius: 5px;
-    background: #ffffff;
-    color: #155eef;
-    font-size: 13px;
-    font-weight: 600;
-    cursor: pointer;
-}
-
-.action-button:hover {
-    background: #e8f0ff;
-}
-
 .empty-message {
     padding: 25px;
     text-align: center;
@@ -478,6 +396,30 @@ tbody tr:hover {
     background: #ffffff;
     color: #b91c1c;
     cursor: pointer;
+}
+.view-all {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 35px;
+}
+.view-all button {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 5px 10px;
+    border: none;
+    background: transparent;
+    color: #155eef;
+    font-size: 18px;
+    font-weight: 700;
+    cursor: pointer;
+}
+.view-all button:hover {
+    text-decoration: underline;
+}
+
+.view-all span {
+    font-size: 25px;
 }
 
 @media (max-width: 1100px) {
@@ -536,7 +478,7 @@ tbody tr:hover {
     }
 
     .treks-section h2 {
-        font-size: 18px;
+        font-size: 19px;
     }
 
     th,

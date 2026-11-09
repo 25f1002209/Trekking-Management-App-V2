@@ -82,23 +82,23 @@ def get_treks():
         return jsonify({
             "success": True,
             "user": {"id": admin.id, "username": admin.username, "email": admin.email},
-            "treks": [{"id": trek.id, "name": trek.name, "location": trek.location, "duration": trek.duration, "difficulty_level": trek.difficulty_level, "price": trek.price, "description": trek.description, "photo": trek.photo, "status": trek.status, "available_slots": trek.available_slots, "assigned_staffs": trek.assigned_staffs} for trek in treks]
+            "treks": [{"id": trek.id, "name": trek.name, "location": trek.location, "start_date": trek.start_date.strftime("%Y-%m-%d"), "end_date": trek.end_date.strftime("%Y-%m-%d"), "difficulty_level": trek.difficulty_level, "price": trek.price, "description": trek.description, "photo": trek.photo, "status": trek.status, "available_slots": trek.available_slots, "assigned_staffs": trek.assigned_staffs} for trek in treks]
         }), 200
     elif request.method == "POST":
         data = request.get_json()
         name = data.get("name", "").strip()
         location = data.get("location", "").strip()
-        duration = data.get("duration", "").strip()
+        start_date_str = data.get("start_date", "").strip()
+        end_date_str = data.get("end_date", "").strip()
         difficulty_level = data.get("difficulty", "").strip()
         price = data.get("price")
         description = data.get("description", "").strip()
         photo = data.get("photo", "").strip()
         status = data.get("status", "Active").strip()
         available_slots = data.get("availableSlots")
-        assigned_staffs = data.get("assignedStaffs", [])
-        if not name or not location or not duration or not difficulty_level or price is None or available_slots is None:
+        if not name or not location or not start_date_str or not end_date_str or not difficulty_level or price is None or available_slots is None:
             return jsonify({"success": False, "message": "All fields are required."}), 400
-        new_trek = Trek(name=name, location=location, duration=duration, difficulty_level=difficulty_level, price=price, description=description, photo=photo, status=status, available_slots=available_slots)
+        new_trek = Trek(name=name, location=location, start_date=datetime.strptime(start_date_str, "%Y-%m-%d").date(), end_date=datetime.strptime(end_date_str, "%Y-%m-%d").date(), difficulty_level=difficulty_level, price=price, description=description, photo=photo, status=status, available_slots=available_slots)
         db.session.add(new_trek)
         db.session.commit()
         return jsonify({"success": True, "message": "Trek created successfully."}), 201
@@ -117,7 +117,8 @@ def manage_trek(trek_id):
         data = request.get_json()
         trek.name = data.get("name", trek.name)
         trek.location = data.get("location", trek.location)
-        trek.duration = data.get("duration", trek.duration)
+        trek.start_date = datetime.strptime(data.get("start_date", trek.start_date), "%Y-%m-%d").date()
+        trek.end_date = datetime.strptime(data.get("end_date", trek.end_date), "%Y-%m-%d").date()
         trek.difficulty_level = data.get("difficulty", trek.difficulty_level)
         trek.price = data.get("price", trek.price)
         trek.description = data.get("description", trek.description)
@@ -257,14 +258,102 @@ def manage_booking(booking_id):
         db.session.commit()
         return jsonify({"success": True, "message": f"Booking status updated to {booking.status}."}), 200
 
-@app.route("/api/staff-dashboard", methods=["GET"])
+@app.route("/api/staff/dashboard", methods=["GET"])
 @jwt_required()
 def staff_dashboard():
     user_id = int(get_jwt_identity())
     staff = Staff.query.get(user_id)
     if not staff:
         return jsonify({"success": False, "message": "Staff not found."}), 404
-    return jsonify({"success": True, "user": {"id": staff.id, "name": staff.name, "email": staff.email, "contact": staff.contact, "experience": staff.experience, "specialization": staff.specialization, "status": staff.status}}), 200
+    treks = db.session.query(Trek.id.label("id"), Trek.name.label("name"), Trek.location.label("location"), Trek.start_date.label("start_date"), Trek.end_date.label("end_date"), Trek.status.label("status"), Trek.available_slots.label("slots"), db.func.count(db.case((Booking.status == "Confirmed", Booking.id), else_=None)).label("participants")).select_from(TrekStaff).join(Trek, TrekStaff.trek_id == Trek.id).filter(TrekStaff.staff_id == staff.id).outerjoin(Booking, Booking.trek_id == Trek.id).group_by(TrekStaff.id, Trek.id).all()
+    assigned_treks = len(treks)
+    total_participants = sum(trek.participants for trek in treks)
+    ongoing_treks = sum(1 for trek in treks if trek.start_date <= today and trek.end_date >= today and trek.status == "Open")
+    return jsonify({
+        "success": True,
+        "user": {"id": staff.id, "name": staff.name},
+        "assigned_treks": assigned_treks,
+        "total_participants": total_participants,
+        "ongoing_treks": ongoing_treks,
+        "treks": [{"id": trek.id, "name": trek.name, "location": trek.location, "start_date": trek.start_date.strftime("%Y-%m-%d") if trek.start_date else None, "end_date": trek.end_date.strftime("%Y-%m-%d") if trek.end_date else None, "participants": trek.participants, "slots": trek.slots + trek.participants, "status": trek.status} for trek in treks]}), 200
+
+@app.route("/api/staff/treks", methods=["GET"])
+@jwt_required()
+def staff_treks():
+    user_id = int(get_jwt_identity())
+    staff = Staff.query.get(user_id)
+    if not staff:
+        return jsonify({"success": False, "message": "Staff not found."}), 404
+    treks = db.session.query(Trek.id.label("id"), Trek.name.label("name"), Trek.location.label("location"), Trek.start_date.label("start_date"), Trek.end_date.label("end_date"), Trek.status.label("status"), Trek.available_slots.label("slots"), Trek.photo.label("photo"), Trek.price.label("price"), Trek.description.label("description"), Trek.difficulty_level.label("difficulty"), db.func.count(db.case((Booking.status == "Confirmed", Booking.id), else_=None)).label("participants")).select_from(TrekStaff).join(Trek, TrekStaff.trek_id == Trek.id).filter(TrekStaff.staff_id == staff.id).outerjoin(Booking, Booking.trek_id == Trek.id).group_by(TrekStaff.id, Trek.id).all()
+    return jsonify({
+        "success": True,
+        "user": {"id": staff.id, "name": staff.name},
+        "treks": [{"id": trek.id, "name": trek.name, "location": trek.location, "start_date": trek.start_date.strftime("%Y-%m-%d") if trek.start_date else None, "end_date": trek.end_date.strftime("%Y-%m-%d") if trek.end_date else None, "participants": trek.participants, "available_slots": trek.slots, "status": trek.status, "photo": trek.photo, "price": trek.price, "description": trek.description, "difficulty": trek.difficulty} for trek in treks]
+    }), 200
+
+@app.route("/api/staff/treks/<int:trek_id>/manage", methods=["POST"])
+@jwt_required()
+def manage_staff_trek(trek_id):
+    user_id = int(get_jwt_identity())
+    staff = Staff.query.get(user_id)
+    trek = Trek.query.get(trek_id)
+    if not staff:
+        return jsonify({"success": False, "message": "Staff not found."}), 404
+    if not trek:
+        return jsonify({"success": False, "message": "Trek not found."}), 404
+    if request.method == "POST":
+        data = request.get_json()
+        trek.status = data.get("status", trek.status)
+        trek.available_slots = data.get("availableSlots", trek.available_slots)
+        db.session.commit()
+        return jsonify({"success": True, "message": "Trek updated successfully."}), 200
+
+@app.route("/api/staff/participants", methods=["GET", "POST"])
+@jwt_required()
+def manage_participants():
+    user_id = int(get_jwt_identity())
+    staff = Staff.query.get(user_id)
+    if not staff:
+        return jsonify({"success": False, "message": "Staff not found."}), 404
+    if request.method == "GET":
+        treks = db.session.query(Trek.id.label("id"), Trek.name.label("name"), Trek.start_date.label("start_date"), Trek.end_date.label("end_date")).select_from(TrekStaff).join(Trek, TrekStaff.trek_id == Trek.id).filter(TrekStaff.staff_id == staff.id).all()
+        return jsonify({
+            "success": True,
+            "user": {"id": staff.id, "name": staff.name},
+            "treks": [{"id": trek.id, "name": trek.name, "start_date": trek.start_date.strftime("%Y-%m-%d"), "end_date": trek.end_date.strftime("%Y-%m-%d")} for trek in treks]
+        }), 200
+    if request.method == "POST":
+        data = request.get_json()
+        trek_id = data.get("assignedTrek") if data else None
+        if not trek_id:
+            return jsonify({"success": False, "message": "Trek ID is required."}), 400
+        trek = Trek.query.get(trek_id)
+        if not trek:
+            return jsonify({"success": False, "message": "Trek not found."}), 404
+        participants = db.session.query(Trekker.id.label("id"), Trekker.name.label("name"), Trekker.email.label("email"), Trekker.contact.label("contact"), Booking.booking_date.label("booking_date"), Booking.payment_status.label("payment_status"), Booking.status.label("status")).join(Booking, Booking.trekker_id == Trekker.id).filter(Booking.trek_id == trek_id).all()
+        return jsonify({
+            "success": True, 
+            "user": {"id": staff.id, "name": staff.name},
+            "participants": [{"id": participant.id, "name": participant.name, "email": participant.email, "contact": participant.contact, "booking_date": participant.booking_date.strftime("%Y-%m-%d") if participant.booking_date else None, "payment_status": participant.payment_status, "status": participant.status} for participant in participants]
+        }), 200
+
+@app.route("/api/staff/profile", methods=["GET", "PUT"])
+@jwt_required()
+def staff_profile():
+    user_id = int(get_jwt_identity())
+    staff = Staff.query.get(user_id)
+    if not staff:
+        return jsonify({"success": False, "message": "Staff not found."}), 404
+    if request.method == "PUT":
+        data = request.get_json()
+        staff.contact = data.get("contact", staff.contact)
+        staff.experience = data.get("experience", staff.experience)
+        staff.specialization = data.get("specialization", staff.specialization)
+        db.session.commit()
+    return jsonify({
+        "success": True,
+        "user": { "id": staff.id, "name": staff.name, "username": staff.username, "email": staff.email, "contact": staff.contact, "experience": staff.experience, "specialization": staff.specialization, "status": staff.status}
+    }), 200
 
 @app.route("/api/trekker-registration", methods=["POST"])
 def trekker_registration():

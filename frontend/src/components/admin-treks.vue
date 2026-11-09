@@ -60,15 +60,19 @@
                 <div class="form-grid">
                     <input v-model="form.name" type="text" placeholder="Trek Name" required/>
                     <input v-model="form.location" type="text" placeholder="Location" required/>
-                    <input v-model="form.duration" type="text" placeholder="Duration" required/>
                     <input v-model="form.difficulty" type="text" placeholder="Difficulty Level" required/>
                     <input v-model="form.price" type="number" placeholder="Price" required/>
                     <input v-model="form.description" type="text" placeholder="Description" required/>
                     <input v-model="form.photo" type="text" placeholder="Photo URL"/>
                     <input v-model="form.availableSlots" type="number" placeholder="Available Slots" required/>
+                    <span style="font-size: medium; font-weight: 600; padding: 5px;"></span>
+                    <label style="font-size: large; font-weight: 600; padding: 10px 15px;" for="start-date">Start Date</label>
+                    <input v-model="form.start_date" type="date" placeholder="Start Date" required/>
+                    <label style="font-size: large; font-weight: 600; padding: 10px 15px;" for="end-date">End Date</label>
+                    <input v-model="form.end_date" type="date" placeholder="End Date" required/>
                 </div>
                 <div class="status-row">
-                    <label for="staff-status">Status</label>
+                    <label style="font-size: large; font-weight: 600; padding: 10px 15px;" for="staff-status">Status</label>
                     <select id="staff-status" v-model="form.status">
                         <option>Open</option>
                         <option>Upcoming</option>
@@ -76,7 +80,7 @@
                     </select>
                 </div>
                 <div class="status-row">
-                    <label>Assigned Staff</label>
+                    <label style="font-size: large; font-weight: 600; padding: 10px 15px;" for="assigned-staff">Assigned Staff</label>
                     <div class="staff-dropdown">
                         <div class="dropdown-header" @click="showStaffDropdown = !showStaffDropdown">
                             <span>{{ form.assignedStaffs.length > 0 ? form.assignedStaffs.length + ' Staff Selected' : 'Select Trekking Staff' }}</span>
@@ -109,37 +113,24 @@
             <div class="form-grid">
               <input v-model="form.name" type="text" placeholder="Trek Name" required/>
               <input v-model="form.location" type="text" placeholder="Location" required/>
-              <input v-model="form.duration" type="text" placeholder="Duration" required/>
               <input v-model="form.difficulty" type="text" placeholder="Difficulty Level" required/>
               <input v-model="form.price" type="number" placeholder="Price" required/>
               <input v-model="form.description" type="text" placeholder="Description" required/>
               <input v-model="form.photo" type="text" placeholder="Photo URL"/>
               <input v-model="form.availableSlots" type="number" placeholder="Available Slots" required/>
+              <span style="font-size: medium; font-weight: 600; padding: 5px;"></span>
+              <label style="font-size: large; font-weight: 600; padding: 10px 15px;" for="start-date">Start Date</label>
+              <input v-model="form.start_date" type="date" placeholder="Start Date" required/>
+              <label style="font-size: large; font-weight: 600; padding: 10px 15px;" for="end-date">End Date</label>
+              <input v-model="form.end_date" type="date" placeholder="End Date" required/>
             </div>
             <div class="status-row">
-              <label for="staff-status">Status</label>
+              <label style="font-size: large; font-weight: 600; padding: 10px 15px;" for="staff-status">Status</label>
               <select id="staff-status" v-model="form.status">
                 <option>Open</option>
                 <option>Upcoming</option>
               </select>
             </div>
-            <!-- <div class="status-row">
-                <label>Assigned Staff</label>
-                <div class="staff-dropdown">
-                    <div class="dropdown-header" @click="showStaffDropdown = !showStaffDropdown">
-                        <span>{{ form.assignedStaffs.length > 0 ? form.assignedStaffs.length + ' Staff Selected' : 'Select Trekking Staff' }}</span>
-                        <span>⌄</span>
-                    </div>
-                    <div v-if="showStaffDropdown" class="dropdown-options">
-                        <label v-for="staff in staffList" :key="staff.id" class="staff-option">
-                            <input type="checkbox" :value="staff.id" v-model="form.assignedStaffs">
-                            <span>{{ staff.name }}</span>
-                            <small>{{ staff.specialization }}</small>
-                        </label>
-                        <div v-if="staffList.length === 0" class="no-staff">No active staff available</div>
-                    </div>
-                </div>
-            </div> -->
             <p v-if="error" class="form-error">{{ error }}</p>
             <div class="form-actions">
               <button type="button" class="cancel-button" @click="closeForm">Cancel</button>
@@ -179,7 +170,7 @@ export default {
         { name: "Bookings", icon: "♘", path: "/admin/bookings" },
         { name: "Reports", icon: "▤", path: "/admin/reports" }
       ],
-      form: {name: "", location: "", description: "", difficulty: "", price: "", photo: "", availableSlots: "", status: "Open", assignedStaffs: []},
+      form: {name: "", location: "", description: "", start_date: "", end_date: "", difficulty: "", price: "", photo: "", availableSlots: "", status: "Open", assignedStaffs: []},
       treks: [],
       admin: {username: "Admin", email: ""}
     };
@@ -240,7 +231,8 @@ export default {
         name: "",
         location: "",
         description: "",
-        duratrion: "",
+        start_date: "",
+        end_date: "",
         difficulty: "",
         price: "",
         photo: "",
@@ -258,7 +250,8 @@ export default {
         name: trek.name,
         location: trek.location,
         description: trek.description,
-        duration: trek.duration,
+        start_date: trek.start_date ? trek.start_date.split("T")[0] : "",
+        end_date: trek.end_date ? trek.end_date.split("T")[0] : "",
         difficulty: trek.difficulty_level,
         price: trek.price,
         photo: trek.photo,
@@ -276,7 +269,8 @@ export default {
         name: "",
         location: "",
         description: "",
-        duration: "",
+        start_date: "",
+        end_date: "",
         difficulty: "",
         price: "",
         photo: "",
@@ -295,7 +289,8 @@ export default {
                     name: this.form.name,
                     location: this.form.location,
                     description: this.form.description,
-                    duration: this.form.duration,
+                    start_date: this.form.start_date,
+                    end_date: this.form.end_date,
                     difficulty: this.form.difficulty,
                     price: this.form.price,
                     photo: this.form.photo,
@@ -328,11 +323,7 @@ export default {
                 this.error = response.data.message || "Failed to load trekking staff.";
             }
         } catch (error) {
-            console.error(
-                "Fetch trekking staff error:",
-                error.response?.status,
-                error.response?.data || error.message
-            );
+            console.error("Fetch trekking staff error:", error.response?.status, error.response?.data || error.message);
             this.error = error.response?.data?.message || "Unable to fetch trekking staff.";
         }
     },
@@ -346,7 +337,8 @@ export default {
                     name: this.form.name,
                     location: this.form.location,
                     description: this.form.description,
-                    duration: this.form.duration,
+                    start_date: this.form.start_date,
+                    end_date: this.form.end_date,
                     difficulty: this.form.difficulty,
                     price: this.form.price,
                     photo: this.form.photo,

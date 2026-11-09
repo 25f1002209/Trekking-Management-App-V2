@@ -171,10 +171,7 @@ export default {
 </script>
 
 <style scoped>
-* {
-    box-sizing: border-box;
-}
-
+* {box-sizing: border-box;}
 .brand {
     top: 0;
     display:flex;
@@ -184,7 +181,6 @@ export default {
     background: rgba(184, 214, 250, 0.9);
     border-bottom: 1px solid rgba(8, 8, 8, 0.25);
 }
-
 .brand h1 {
     margin: 0;
     font-size: 30px;
@@ -204,19 +200,6 @@ export default {
     color: #00027f;
     text-align: left;
 }
-
-.btn {
-    padding: 5px 10px;
-    text-decoration: none;
-    border: 2px solid;
-    background-color: #af8523;
-    color: black;
-    font-size: 16px;
-    font-weight: bold;
-    cursor: pointer;
-    border-radius: 4px;
-}
-
 .dashboard {
     display: flex;
     width: 100%;
@@ -225,7 +208,6 @@ export default {
     color: #111827;
     background: #ffffff;
 }
-
 .sidebar {
     width: 240px;
     min-width: 205px;
@@ -277,7 +259,6 @@ export default {
     font-size: 21px;
     flex-shrink: 0;
 }
-
 .main-section {
     flex: 1;
     min-width: 0;
@@ -286,23 +267,6 @@ export default {
 .main-section.expanded {
     min-width: 0;
 }
-
-.topbar {
-    height: 55px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 25px;
-    border-bottom: 2px solid #e2e8f0;
-    background: #ffffff;
-}
-
-.topbar h3 {
-    margin: 0;
-    font-size: 16px;
-    font-weight: 700;
-}
-
 .admin-profile {
     display: flex;
     align-items: center;
@@ -310,28 +274,14 @@ export default {
     font-size: 14px;
     font-weight: 600;
 }
-
-.profile-icon {
-    width: 32px;
-    height: 32px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border: 2px solid #cbd5e1;
-    border-radius: 50%;
-    font-size: 24px;
-}
-
 .dashboard-content {
     padding: 25px 22px;
 }
-
 .dashboard-content h1 {
     margin: 0 0 27px;
     font-size: 28px;
     font-weight: 700;
 }
-
 .stats-container {
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -414,11 +364,13 @@ tbody tr:hover {
     font-weight: 600;
 }
 
-.status.booked {
+.status.Confirmed {
     color: #15803d;
 }
-
-.status.cancelled {
+.status.Pending {
+    color: #facc15;
+}
+.status.Cancelled {
     color: #dc2626;
 }
 
