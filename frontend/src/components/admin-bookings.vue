@@ -13,7 +13,7 @@
           <span class="menu-symbol">{{ item.icon }}</span>
           <span>{{ item.name }}</span>
         </div>
-        <div class="menu-item" style="margin-top: 230px;" @click="logout"><span class="menu-symbol">⇥</span><span>Logout</span></div>
+        <div class="menu-item" style="margin-top: 302px;" @click="logout"><span class="menu-symbol">⇥</span><span>Logout</span></div>
       </div>
     </aside>
     <div class="main-section">
@@ -21,7 +21,6 @@
         <template v-if="!showForm">
           <div class="page-heading">
             <h1>Bookings</h1>
-            <button class="create-button" @click="openForm">Create New Booking</button>
           </div>
           <input class="search-box" v-model="search" type="text" placeholder="Search bookings..."/>
           <div class="table-container">
@@ -56,11 +55,11 @@
         </template>
         <template v-else-if="isManage">
             <h1>Manage Booking</h1>
-            <form class="staff-form" @submit.prevent="updateTrek(selectedTrek.id)">
+            <form class="staff-form" @submit.prevent="updateBooking(selectedBooking.id)">
                 <div class="form-grid">
-                    <input v-model="form.trekker_name" type="text" placeholder="Trek Name" readonly/>
-                    <input v-model="form.trek_name" type="text" placeholder="Location" readonly/>
-                    <input v-model="form.booking_date" type="text" placeholder="Duration" required/>
+                    <input v-model="selectedBooking.trekker_name" type="text" placeholder="Trek Name" readonly/>
+                    <input v-model="selectedBooking.trek_name" type="text" placeholder="Location" readonly/>
+                    <input v-model="selectedBooking.booking_date" type="text" placeholder="Duration" required/>
                 </div>
                 <div class="status-row">
                     <label for="staff-status">Status</label>
@@ -89,56 +88,6 @@
                 <p>You can manage the booking details here.</p>
             </div>
         </template>
-        <!-- <template v-else>
-          <h1>Create New Booking</h1>
-          <form class="staff-form" @submit.prevent="createTrek">
-            <div class="form-grid">
-              <input v-model="form.name" type="text" placeholder="Trek Name" required/>
-              <input v-model="form.location" type="text" placeholder="Location" required/>
-              <input v-model="form.duration" type="text" placeholder="Duration" required/>
-              <input v-model="form.difficulty" type="text" placeholder="Difficulty Level" required/>
-              <input v-model="form.price" type="number" placeholder="Price" required/>
-              <input v-model="form.description" type="text" placeholder="Description" required/>
-              <input v-model="form.photo" type="text" placeholder="Photo URL"/>
-              <input v-model="form.availableSlots" type="number" placeholder="Available Slots" required/>
-            </div>
-            <div class="status-row">
-              <label for="staff-status">Status</label>
-              <select id="staff-status" v-model="form.status">
-                <option>Open</option>
-                <option>Upcoming</option>
-                <option>Confirmed</option>
-                <option>Cancelled</option>
-              </select>
-            </div>
-             <div class="status-row">
-                <label>Assigned Staff</label>
-                <div class="staff-dropdown">
-                    <div class="dropdown-header" @click="showStaffDropdown = !showStaffDropdown">
-                        <span>{{ form.assignedStaffs.length > 0 ? form.assignedStaffs.length + ' Staff Selected' : 'Select Trekking Staff' }}</span>
-                        <span>⌄</span>
-                    </div>
-                    <div v-if="showStaffDropdown" class="dropdown-options">
-                        <label v-for="staff in staffList" :key="staff.id" class="staff-option">
-                            <input type="checkbox" :value="staff.id" v-model="form.assignedStaffs">
-                            <span>{{ staff.name }}</span>
-                            <small>{{ staff.specialization }}</small>
-                        </label>
-                        <div v-if="staffList.length === 0" class="no-staff">No active staff available</div>
-                    </div>
-                </div>
-            </div>
-            <p v-if="error" class="form-error">{{ error }}</p>
-            <div class="form-actions">
-              <button type="button" class="cancel-button" @click="closeForm">Cancel</button>
-              <button type="submit" class="create-button">Create Booking</button>
-            </div>
-          </form>
-          <div class="notice">
-            <span class="notice-icon">ⓘ</span>
-            <p>The trek will be added to the system.</p>
-          </div>
-        </template> -->
       </main>
     </div>
   </div>
@@ -152,7 +101,7 @@ export default {
   data() {
     return {
       showForm: false,
-      selectedTrek: null,
+      selectedBooking: null,
       isManage: false,
       showStaffDropdown: false,
       search: "",
@@ -164,9 +113,8 @@ export default {
         { name: "Trekking Staff", icon: "♙", path: "/admin/trekking-staff" },
         { name: "Trekkers", icon: "♙", path: "/admin/trekkers" },
         { name: "Bookings", icon: "♘", path: "/admin/bookings" },
-        { name: "Reports", icon: "▤", path: "/admin/reports" }
       ],
-      form: {name: "", location: "", description: "", difficulty: "", price: "", photo: "", availableSlots: "", status: "Open", assignedStaffs: []},
+      form: {payment_status: "", status: ""},
       bookings: [],
       admin: {username: "Admin", email: ""}
     };
@@ -213,6 +161,28 @@ export default {
         }
     },
 
+    async updateBooking(id) {
+        this.error = "";
+        try {
+            const response = await axios.post(`http://localhost:5000/api/admin/bookings/${id}/manage`,
+                {
+                    status: this.form.status,
+                    payment_status: this.form.payment_status
+                },
+                {headers: {Authorization: `Bearer ${localStorage.getItem("token")}`}}
+            );
+
+            if (response.data.success) {
+                alert("Booking updated successfully!");
+                this.closeManage();
+                await this.fetchBookingsList();
+            }
+        } catch (error) {
+            console.error("Update booking error:", error.response?.data || error);
+            this.error = error.response?.data?.message || "Failed to update trek.";
+        }
+    },
+
     openForm() {
       this.error = "";
       this.showForm = true;
@@ -223,135 +193,30 @@ export default {
       this.error = "";
 
       this.form = {
-        name: "",
-        location: "",
-        description: "",
-        duratrion: "",
-        difficulty: "",
-        price: "",
-        photo: "",
-        availableSlots: "",
-        status: "Open",
-        assignedStaffs: []
+        status: "",
+        payment_status: ""
       };
     },
 
-    openManage(trek) {
+    openManage(booking) {
       this.isManage = true;
       this.showForm = true;
-      this.selectedTrek = trek;
+      this.selectedBooking = booking;
       this.form = {
-        name: trek.name,
-        location: trek.location,
-        description: trek.description,
-        duration: trek.duration,
-        difficulty: trek.difficulty_level,
-        price: trek.price,
-        photo: trek.photo,
-        availableSlots: trek.available_slots,
-        status: trek.status,
-        assignedStaffs: (trek.assigned_staffs || []).map(id => typeof id === "object" ? Number(id.id) : Number(id))
+        status : booking.status,
+        payment_status: booking.payment_status
       };
     },
 
     closeManage() {
       this.isManage = false;
       this.showForm = false;
+      this.selectedBooking = null;
       this.error = "";
       this.form = {
-        name: "",
-        location: "",
-        description: "",
-        duration: "",
-        difficulty: "",
-        price: "",
-        photo: "",
-        availableSlots: "",
-        status: "Open",
-        assignedStaffs: []
+        status: "",
+        payment_status: ""
       };
-    },
-
-    async createTrek() {
-        this.error = "";
-        try {
-            const response = await axios.post(
-                "http://localhost:5000/api/admin/treks",
-                {
-                    name: this.form.name,
-                    location: this.form.location,
-                    description: this.form.description,
-                    duration: this.form.duration,
-                    difficulty: this.form.difficulty,
-                    price: this.form.price,
-                    photo: this.form.photo,
-                    availableSlots: this.form.availableSlots,
-                    status: this.form.status
-                },
-                {headers: {Authorization: `Bearer ${localStorage.getItem("token")}`}}
-            );
-
-            if (response.data.success) {
-                alert("Trek created successfully!");
-                this.closeForm();
-                await this.fetchTreksList();
-            }
-        } catch (error) {
-            console.error("Create trek error:", error.response?.data || error);
-            this.error = error.response?.data?.message || "Failed to create trek.";
-        }
-    },
-
-    async fetchsStaffList() {
-        try {
-            const response = await axios.get("http://localhost:5000/api/admin/trekking-staff",
-                {headers: {Authorization: `Bearer ${localStorage.getItem("token")}`}}
-            );
-            console.log("Staff API response:", response.data);
-            if (response.data.success) {
-                this.staffList = response.data.staffs.filter(staff => staff.status === "Active") || [];
-            } else {
-                this.error = response.data.message || "Failed to load trekking staff.";
-            }
-        } catch (error) {
-            console.error(
-                "Fetch trekking staff error:",
-                error.response?.status,
-                error.response?.data || error.message
-            );
-            this.error = error.response?.data?.message || "Unable to fetch trekking staff.";
-        }
-    },
-
-    async updateTrek(id) {
-        this.error = "";
-        try {
-            const response = await axios.post(
-                `http://localhost:5000/api/admin/treks/${id}/manage`,
-                {
-                    name: this.form.name,
-                    location: this.form.location,
-                    description: this.form.description,
-                    duration: this.form.duration,
-                    difficulty: this.form.difficulty,
-                    price: this.form.price,
-                    photo: this.form.photo,
-                    availableSlots: this.form.availableSlots,
-                    status: this.form.status,
-                    assignedStaffs: this.form.assignedStaffs
-                },
-                {headers: {Authorization: `Bearer ${localStorage.getItem("token")}`}}
-            );
-
-            if (response.data.success) {
-                alert("Trek updated successfully!");
-                this.closeManage();
-                await this.fetchTreksList();
-            }
-        } catch (error) {
-            console.error("Update trek error:", error.response?.data || error);
-            this.error = error.response?.data?.message || "Failed to update trek.";
-        }
     },
 
     logout() {
@@ -601,32 +466,6 @@ tbody tr:hover {
     background: #f8fafc;
 }
 
-.status {
-    display: inline-block;
-    padding: 5px 9px;
-    border: 1px solid;
-    border-radius: 5px;
-    font-size: 12px;
-    font-weight: 600;
-}
-
-.status.Open {
-    border-color: #86d5a8;
-    color: #15803d;
-    background: #f0fdf4;
-}
-
-.status.Closed {
-    border-color: #fca5a5;
-    color: #dc2626;
-    background: #fef2f2;
-}
-.status.Upcoming {
-    border-color: #facc15;
-    color: #b45309;
-    background: #fffbeb;
-}
-
 .action-button {
     padding: 6px 9px;
     border: 1px solid;
@@ -833,6 +672,31 @@ tbody tr:hover {
     margin: 12px 0 0;
     color: #dc2626;
     font-size: 13px;
+}
+.status {
+    font-weight: 600;
+}
+
+.status.Open {
+    color: #15803d;
+}
+.status.Upcoming {
+    color: #f97316;
+}
+.status.Closed {
+    color: #dc2626;
+}
+.status.Cancelled {
+    color: #dc2626;
+}
+.status.Pending{
+    color: #f97316;
+}
+.status.Confirmed{
+    color: #15803d
+}
+.status.Completed{
+    color: #15803d
 }
 
 @media (max-width: 760px) {

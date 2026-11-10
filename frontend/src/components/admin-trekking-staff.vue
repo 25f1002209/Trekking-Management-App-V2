@@ -13,7 +13,7 @@
           <span class="menu-symbol">{{ item.icon }}</span>
           <span>{{ item.name }}</span>
         </div>
-        <div class="menu-item" style="margin-top: 230px;" @click="logout"><span class="menu-symbol">⇥</span><span>Logout</span></div>
+        <div class="menu-item" style="margin-top: 302px;" @click="logout"><span class="menu-symbol">⇥</span><span>Logout</span></div>
       </div>
     </aside>
     <div class="main-section">
@@ -112,7 +112,6 @@ export default {
         { name: "Trekking Staff", icon: "♙", path: "/admin/trekking-staff" },
         { name: "Trekkers", icon: "♙", path: "/admin/trekkers" },
         { name: "Bookings", icon: "♘", path: "/admin/bookings" },
-        { name: "Reports", icon: "▤", path: "/admin/reports" }
       ],
       form: {name: "", username: "", email: "", contact: "", password: "", confirmPassword: "", experience: "", specialization: "", status: "Active"},
       staffList: [],

@@ -70,7 +70,7 @@
                     <label style="font-size: large; font-weight: 600; padding: 10px 15px;" for="start-date">Start Date</label>
                     <input v-model="form.start_date" type="date" placeholder="Start Date" readonly/>
                     <label style="font-size: large; font-weight: 600; padding: 10px 15px;" for="end-date">End Date</label>
-                    <input v-model="form.end_date" type="date" placeholder="End Date" readonly/>
+                    <input v-model="form.end_date" type="date" placeholder="End Date" required/>
                 </div>
                 <div class="status-row">
                     <label style="font-size: large; font-weight: 600; padding: 10px 15px;" for="staff-status">Status</label>
@@ -106,11 +106,11 @@ export default {
       selectedTrek: null,
       isManage: false,
       search: "",
-      activeMenu: "Treks",
+      activeMenu: "My Treks",
       error: "",
       menuItems: [
         { name: "Dashboard", icon: "⌂", path: "/staff/dashboard" },
-        { name: "Treks", icon: "♧", path: "/staff/treks" },
+        { name: "My Treks", icon: "♧", path: "/staff/treks" },
         { name: "Participants", icon: "♙", path: "/staff/participants" },
         { name: "Profile", icon: "♙", path: "/staff/profile" }
       ],

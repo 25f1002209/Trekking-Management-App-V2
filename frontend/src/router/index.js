@@ -11,12 +11,16 @@ import AdminManageBookings from '../components/admin-bookings.vue'
 import StaffManageTreks from '../components/staff-treks.vue'
 import StaffManageParticipants from '../components/staff-participants.vue'
 import StaffProfile from '../components/staff-profile.vue'
+import TrekkerBrowseTreks from '../components/trekker-browse-treks.vue'
+import TrekkerBookings from '../components/trekker-bookings.vue'
+import TrekkerHistory from '../components/trekker-history.vue'
+import TrekkerProfile from '../components/trekker-profile.vue'
 
 const routes = [
   {path: '/', name: 'Home', component: home},
   {path: '/admin/dashboard', name: 'AdminDashboard', component: AdminDashboard},
   {path: '/staff/dashboard', name: 'StaffDashboard', component: StaffDashboard},
-  {path: '/trekker-dashboard', name: 'TrekkerDashboard', component: TrekkerDashboard},
+  {path: '/trekker/dashboard', name: 'TrekkerDashboard', component: TrekkerDashboard},
   {path: '/admin/trekking-staff', name: 'AdminManageTrekkingStaff', component: AdminManageTrekkingStaff},
   {path: '/trekker/registration', name: 'TrekkerRegistration', component: TrekkerRegistration},
   {path: '/admin/trekkers', name: 'AdminManageTrekkers', component: AdminManageTrekkers},
@@ -24,7 +28,11 @@ const routes = [
   {path: '/admin/bookings', name: 'AdminManageBookings', component: AdminManageBookings},
   {path: '/staff/treks', name: 'StaffManageTreks', component: StaffManageTreks},
   {path: '/staff/participants', name: 'StaffManageParticipants', component: StaffManageParticipants},
-  {path: '/staff/profile', name: 'StaffProfile', component: StaffProfile}
+  {path: '/staff/profile', name: 'StaffProfile', component: StaffProfile},
+  {path: '/trekker/browse-treks', name: 'TrekkerBrowseTreks', component: TrekkerBrowseTreks},
+  {path: '/trekker/bookings', name: 'TrekkerBookings', component: TrekkerBookings},
+  {path: '/trekker/history', name: 'TrekkerHistory', component: TrekkerHistory},
+  {path: '/trekker/profile', name: 'TrekkerProfile', component: TrekkerProfile}
 ]
 
 const router = createRouter({history: createWebHistory(), routes})

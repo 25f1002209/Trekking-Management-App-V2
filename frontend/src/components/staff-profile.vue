@@ -76,7 +76,7 @@ export default {
             user: {name: ""},
             menuItems: [
                 { name: "Dashboard", icon: "⌂", path: "/staff/dashboard" },
-                { name: "Treks", icon: "♧", path: "/staff/treks" },
+                { name: "My Treks", icon: "♧", path: "/staff/treks" },
                 { name: "Participants", icon: "♙", path: "/staff/participants" },
                 { name: "Profile", icon: "♙", path: "/staff/profile" }
             ],

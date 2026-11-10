@@ -21,7 +21,7 @@ class Trek(db.Model):
     price = db.Column(db.Float, nullable=False)
     description = db.Column(db.Text, nullable=True)
     photo = db.Column(db.String(255), nullable=True)
-    status = db.Column(db.String(20), nullable=False, default='active')  # active or closed
+    status = db.Column(db.String(20), nullable=False, default='active')  # active, upcoming or closed
     available_slots = db.Column(db.Integer, nullable=False)
 
 class Staff(db.Model):
@@ -54,5 +54,6 @@ class Booking(db.Model):
     trekker_id = db.Column(db.Integer, db.ForeignKey(Trekker.id), nullable=False)
     trek_id = db.Column(db.Integer, db.ForeignKey(Trek.id), nullable=False)
     booking_date = db.Column(db.Date, nullable=False, default=date.today)
-    payment_status = db.Column(db.String(20), nullable=False, default='pending')  # pending, completed, failed
-    status = db.Column(db.String(20), nullable=False, default='pending')  # pending, confirmed, cancelled
+    payment_mode = db.Column(db.String, nullable=False) # cash, card, upi
+    payment_status = db.Column(db.String(20), nullable=False, default='Pending')  # pending, completed, failed
+    status = db.Column(db.String(20), nullable=False, default='Pending')  # pending, confirmed, cancelled

@@ -13,7 +13,7 @@
           <span class="menu-symbol">{{ item.icon }}</span>
           <span>{{ item.name }}</span>
         </div>
-        <div class="menu-item" style="margin-top: 230px;" @click="logout"><span class="menu-symbol">⇥</span><span>Logout</span></div>
+        <div class="menu-item" style="margin-top: 302px;" @click="logout"><span class="menu-symbol">⇥</span><span>Logout</span></div>
       </div>
     </aside>
     <div class="main-section" :class="{ expanded: sidebarHidden }">
@@ -70,11 +70,11 @@
               <tbody>
                 <tr v-for="booking in bookings" :key="booking.id">
                   <td>{{ booking.id }}</td>
-                  <td>{{ booking.user }}</td>
+                  <td>{{ booking.trekker }}</td>
                   <td>{{ booking.trek }}</td>
-                  <td>{{ booking.date }}</td>
+                  <td>{{ booking.booking_date }}</td>
                   <td>
-                    <span class="status" :class="booking.status.toLowerCase()">{{ booking.status }}</span>
+                    <span class="status" :class="booking.status">{{ booking.status }}</span>
                   </td>
                 </tr>
               </tbody>
@@ -114,7 +114,6 @@ export default {
         { name: "Trekking Staff", icon: "♙", path: "/admin/trekking-staff" },
         { name: "Trekkers", icon: "♙", path: "/admin/trekkers" },
         { name: "Bookings", icon: "♘", path: "/admin/bookings" },
-        { name: "Reports", icon: "▤", path: "/admin/reports" }
       ],
 
       bookings: []
@@ -364,16 +363,24 @@ tbody tr:hover {
     font-weight: 600;
 }
 
-.status.Confirmed {
+.status.Open {
     color: #15803d;
 }
-.status.Pending {
-    color: #facc15;
+.status.Upcoming {
+    color: #f97316;
+}
+.status.Closed {
+    color: #dc2626;
 }
 .status.Cancelled {
     color: #dc2626;
 }
-
+.status.Pending{
+    color: #f97316;
+}
+.status.Confirmed{
+    color: #15803d
+}
 .view-all {
     display: flex;
     justify-content: flex-end;

@@ -18,50 +18,95 @@
         </aside>
         <main class="main-section">
             <div class="dashboard-content">
-                <h1>Participants Management</h1>
-                <p>Welcome to the Participants management section. Here you can view and manage all participants registered for treks.</p>
-                <div v-if="error" class="notice">
-                    <span class="notice-icon">⚠️</span>
-                    <p>{{ error }}</p>
-                </div>
-                <div class="staff-dropdown">
-                    <div class="dropdown-header" @click="showTrekDropdown = !showTrekDropdown">
-                        <span>{{ treks.find(t => t.id == form.assignedTrek)?.name || 'Select Trek' }}</span><span>{{ showTrekDropdown ? '⌃' : '⌄' }}</span>
+                <template v-if="isManage">
+                    <h1>Manage Booking</h1>
+                        <form class="staff-form" @submit.prevent="updateParticipant(selectedParticipant.id)">
+                            <div class="form-grid">
+                                <input v-model="selectedParticipant.trekker_name" type="text" placeholder="Trek Name" readonly/>
+                                <input v-model="selectedParticipant.trek_name" type="text" placeholder="Location" readonly/>
+                                <input v-model="selectedParticipant.booking_date" type="text" placeholder="Duration" required/>
+                            </div>
+                            <div class="status-row">
+                                <label for="staff-status">Payment Status</label>
+                                <select id="staff-status" v-model="form.payment_status">
+                                    <option>Pending</option>
+                                    <option>Completed</option>
+                                    <option>Failed</option>
+                                </select>
+                            </div>
+                            <div class="status-row">
+                                <label for="staff-status">Status</label>
+                                <select id="staff-status" v-model="form.status">
+                                    <option>Pending</option>
+                                    <option>Confirmed</option>
+                                    <option>Cancelled</option>
+                                </select>
+                            </div>
+                            <p v-if="error" class="form-error">{{ error }}</p>
+                            <div class="form-actions">
+                                <button type="button" class="cancel-button" @click="closeManage">Close</button>
+                                <button type="submit" class="create-button">Update Booking</button>
+                            </div>
+                        </form>
+                        <div class="notice">
+                            <span class="notice-icon">ⓘ</span>
+                            <p>You can manage the booking details here.</p>
+                        </div>
+                </template>
+                <template v-else>
+                    <h1>Participants Management</h1>
+                    <p>Welcome to the Participants management section. Here you can view and manage all participants registered for treks.</p>
+                    <div v-if="error" class="notice">
+                        <span class="notice-icon">⚠️</span>
+                        <p>{{ error }}</p>
                     </div>
-                    <div v-if="showTrekDropdown" class="dropdown-options">
-                        <label v-for="trek in treks" :key="trek.id" class="staff-option">
-                            <input type="radio" :value="trek.id" v-model="form.assignedTrek" @change="showTrekDropdown = false; fetchParticipantsList(trek.id)"/>
-                            <span>{{ trek.name }}</span>
-                            <small>{{ trek.start_date }} to {{ trek.end_date }}</small>
-                        </label>
-                        <div v-if="treks.length === 0" class="no-staff">
-                            No treks available
+                    <div class="staff-dropdown">
+                        <div class="dropdown-header" @click="showTrekDropdown = !showTrekDropdown">
+                            <span>{{ treks.find(t => t.id == assignedTrek)?.name || 'Select Trek' }}</span><span>{{ showTrekDropdown ? '⌃' : '⌄' }}</span>
+                        </div>
+                        <div v-if="showTrekDropdown" class="dropdown-options">
+                            <label v-for="trek in treks" :key="trek.id" class="staff-option">
+                                <input type="radio" :value="trek.id" v-model="assignedTrek" @change="showTrekDropdown = false; fetchParticipantsList(trek.id)"/>
+                                <span>{{ trek.name }}</span>
+                                <small>{{ trek.start_date }} to {{ trek.end_date }}</small>
+                            </label>
+                            <div v-if="treks.length === 0" class="no-staff">
+                                No treks available
+                            </div>
                         </div>
                     </div>
-                </div>
-                <div v-if="participants.length > 0" class="table-container">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Name</th>
-                                <th>Email</th>
-                                <th>Phone</th>
-                                <th>Status</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr v-for="participant in participants" :key="participant.id">
-                                <td>{{ participant.name }}</td>
-                                <td>{{ participant.email }}</td>
-                                <td>{{ participant.phone }}</td>
-                                <td><span class="status" :class="participant.status">{{ participant.status }}</span></td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-                <div v-else-if="form.assignedTrek" class="empty-message">
-                    No participants found for the selected trek.
-                </div>
+                    <div v-if="participants.length > 0">
+                        <h3>Participants for the trek</h3>
+                        <div class="table-container">
+                        
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Name</th>
+                                        <th>Email</th>
+                                        <th>Phone</th>
+                                        <th>Payment Status</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr v-for="participant in participants" :key="participant.id">
+                                        <td>{{ participant.name }}</td>
+                                        <td>{{ participant.email }}</td>
+                                        <td>{{ participant.contact }}</td>
+                                        <td><span class="status" :class="participant.payment_status">{{ participant.payment_status }}</span></td>
+                                        <td><span class="status" :class="participant.status">{{ participant.status }}</span></td>
+                                        <td><button class="action-button block-button" style="color: blue; border-color: blue; font-weight: bold;" @click="openManage(participant)">Manage</button></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div v-else-if="assignedTrek" class="empty-message">
+                        No participants found for the selected trek.
+                    </div>
+                </template>
             </div>
         </main>
     </div>
@@ -75,16 +120,19 @@ export default {
             user: {},
             menuItems: [
                 { name: "Dashboard", icon: "⌂", path: "/staff/dashboard" },
-                { name: "Treks", icon: "♧", path: "/staff/treks" },
+                { name: "My Treks", icon: "♧", path: "/staff/treks" },
                 { name: "Participants", icon: "♙", path: "/staff/participants" },
                 { name: "Profile", icon: "♙", path: "/staff/profile" }
             ],
+            selectedParticipant: null,
+            isManage: false,
             activeMenu: "Participants",
             treks: [],
             participants: [],
             error: "",
             user: {name: ""},
-            form: {assignedTrek: null},
+            assignedTrek: null,
+            form: {status: "", payment_status: ""},
             showTrekDropdown: false
         };
     },
@@ -111,7 +159,7 @@ export default {
         },
         async fetchParticipantsList(trekId) {
             try {
-                console.log("Fetching participants for trek ID:", this.form.assignedTrek);
+                console.log("Fetching participants for trek ID:", this.assignedTrek);
                 const response = await axios.post("http://localhost:5000/api/staff/participants",
                     { assignedTrek: trekId },
                     {headers: {Authorization: `Bearer ${localStorage.getItem("token")}`}},
@@ -127,6 +175,45 @@ export default {
                 console.error("Fetch treks error:", error.response?.status, error.response?.data || error.message);
                 this.error = error.response?.data?.message || "Unable to fetch Participants.";
             }
+        },
+        async updateParticipant(id) {
+            this.error = "";
+            try {
+                const response = await axios.post(`http://localhost:5000/api/staff/participants/${id}/manage`,
+                    {
+                        status: this.form.status,
+                        payment_status: this.form.payment_status
+                    },
+                    {headers: {Authorization: `Bearer ${localStorage.getItem("token")}`}}
+                );
+
+                if (response.data.success) {
+                    alert("Booking updated successfully!");
+                    this.closeManage();
+                    await this.fetchParticipantsList(this.assignedTrek);
+                }
+            } catch (error) {
+                console.error("Update participant error:", error.response?.data || error);
+                this.error = error.response?.data?.message || "Failed to update trek.";
+            }
+        },
+        openManage(participant) {
+            this.isManage = true;
+            this.selectedParticipant = participant;
+            this.form = {
+                status : participant.status,
+                payment_status: participant.payment_status
+            };
+        },
+
+        closeManage() {
+            this.isManage = false;
+            this.selectedParticipant = null;
+            this.error = "";
+            this.form = {
+                status: "",
+                payment_status: ""
+            };
         },
         logout() {
             localStorage.removeItem("token");
@@ -306,6 +393,7 @@ export default {
 }
 .search-box:focus {border-color: #93b4ff;}
 .table-container {
+    margin-top: 25px;
     width: 100%;
     overflow-x: auto;
     border: 2px solid #e2e8f0;
@@ -330,27 +418,29 @@ td {
 }
 tbody tr:hover {background: #f8fafc;}
 .status {
-    display: inline-block;
-    padding: 5px 9px;
-    border: 1px solid;
-    border-radius: 5px;
-    font-size: 12px;
     font-weight: 600;
 }
+
 .status.Open {
-    border-color: #86d5a8;
     color: #15803d;
-    background: #f0fdf4;
-}
-.status.Closed {
-    border-color: #fca5a5;
-    color: #dc2626;
-    background: #fef2f2;
 }
 .status.Upcoming {
-    border-color: #facc15;
-    color: #b45309;
-    background: #fffbeb;
+    color: #f97316;
+}
+.status.Closed {
+    color: #dc2626;
+}
+.status.Cancelled {
+    color: #dc2626;
+}
+.status.Pending{
+    color: #f97316;
+}
+.status.Confirmed{
+    color: #15803d
+}
+.status.Completed{
+    color: #15803d
 }
 .action-button {
     padding: 6px 9px;
