@@ -443,7 +443,10 @@ def trekker_browse():
     elif request.method == 'POST':
         data = request.get_json()
         trek_id = data.get("trek_id", "")
+        trek = Trek.query.filter_by(id=trek_id).first()
         payment_mode = data.get("payment_mode", "")
+        if trek.avaialable_slots < 1:
+            return jsonify({"success": False, "message": "No more slots left."}), 404
         if not trek_id:
             return jsonify({"success": False, "message": "Trek not found."}), 404
         if not payment_mode:
@@ -451,9 +454,10 @@ def trekker_browse():
         existing_booking = Booking.query.filter(Booking.trek_id == trek_id, Booking.trekker_id == user_id).first()
         if existing_booking:
             return jsonify({"success": False, "message": f"You have aldready booked this trek on{ existing_booking.booking_date.strftime('%d-%m-%Y') }."}), 409
-        trek = Trek.query.filter_by(id=trek_id).first()
         slots = trek.available_slots - 1
         trek.available_slots = slots
+        if slots < 1:
+            trek.status = "Closed"
         new_booking = Booking(trek_id=trek_id, trekker_id=user_id, payment_mode=payment_mode)
         db.session.add(new_booking)
         db.session.commit()
