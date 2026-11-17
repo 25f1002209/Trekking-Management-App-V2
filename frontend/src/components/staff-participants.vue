@@ -19,11 +19,12 @@
         <main class="main-section">
             <div class="dashboard-content">
                 <template v-if="isManage">
-                    <h1>Manage Booking</h1>
+                    <h1>Manage Participants</h1>
                         <form class="staff-form" @submit.prevent="updateParticipant(selectedParticipant.id)">
                             <div class="form-grid">
-                                <input v-model="selectedParticipant.trekker_name" type="text" placeholder="Trek Name" readonly/>
-                                <input v-model="selectedParticipant.trek_name" type="text" placeholder="Location" readonly/>
+                                <input v-model="selectedParticipant.name" type="text" placeholder="Name" readonly/>
+                                <input v-model="selectedParticipant.email" type="text" placeholder="Email" readonly/>
+                                <input v-model="selectedParticipant.contact" type="text" placeholder="Contact" readonly/>
                                 <input v-model="selectedParticipant.booking_date" type="text" placeholder="Duration" required/>
                             </div>
                             <div class="status-row">

@@ -200,7 +200,7 @@ export default {
         try{
             const response = await axios.post("http://localhost:5000/api/trekker/browse-treks", {payment_mode: this.form.payment_mode, trek_id: this.selectedTrek.id}, { headers: { Authorization: `Bearer ${localStorage.getItem("token")}` } });
             if (response.data.success) {
-                alert("Trek created successfully!");
+                alert("Trek booked successfully!");
                 this.closeBooking();
             }
         } catch (error) {

@@ -5,6 +5,9 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
 from models import Staff, Trekker, Trek, Booking, Admin, TrekStaff, db
 from datetime import date, datetime
+from flask_mail import Mail
+
+
 
 
 today = date.today()
@@ -14,7 +17,16 @@ jwt = JWTManager(app)
 app.config['SECRET_KEY'] = 'abc123xyz'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///app.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config["MAIL_SERVER"] = "smtp.gmail.com"
+app.config["MAIL_PORT"] = 587
+app.config["MAIL_USE_TLS"] = True
+app.config["MAIL_USE_SSL"] = False
+app.config["MAIL_USERNAME"] = "manandipdas@gmail.com"
+app.config["MAIL_PASSWORD"] = "yczp pmbp kdgz oiwr"
+app.config["MAIL_DEFAULT_SENDER"] = "manandipdas@gmail.com"
+mail = Mail()
 db.init_app(app)
+mail.init_app(app)
 CORS(app, supports_credentials=True)
 
 @app.route('/api/home')
@@ -445,7 +457,7 @@ def trekker_browse():
         trek_id = data.get("trek_id", "")
         trek = Trek.query.filter_by(id=trek_id).first()
         payment_mode = data.get("payment_mode", "")
-        if trek.avaialable_slots < 1:
+        if trek.available_slots < 1:
             return jsonify({"success": False, "message": "No more slots left."}), 404
         if not trek_id:
             return jsonify({"success": False, "message": "Trek not found."}), 404
@@ -486,6 +498,17 @@ def trekker_history():
             "user": {"id": trekker.id, "name": trekker.name, "email": trekker.email, "contact": trekker.contact},
             "bookings": [{"id": booking.id, "booking_date": booking.booking_date.strftime("%d-%m-%Y"), "trek_name": booking.trek_name, "trek_dates": booking.start_date.strftime("%d-%m-%Y") + " to " + booking.end_date.strftime("%d-%m-%Y"), "status": booking.status, "payment_status": booking.payment_status} for booking in bookings]
         }), 200
+
+@app.route("/api/trekker/history/export-history", methods=["PUT"])
+@jwt_required()
+def export_history():
+    from tasks import export_history
+    trekker_id = int(get_jwt_identity())
+    export_history.delay(trekker_id)
+    return jsonify({
+        "success": True,
+        "message": "History mailed."
+    })
 
 @app.route("/api/trekker/profile", methods=["GET", "PUT"])
 @jwt_required()

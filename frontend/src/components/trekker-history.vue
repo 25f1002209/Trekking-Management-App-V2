@@ -25,8 +25,10 @@
           {{ error }}
           <button @click="fetchBookingdData">Retry</button>
         </div>
-        <div class="bookings-section">
+        <div class="page-heading">
           <h1>My Bookings</h1>
+          <button class="create-button" @click="exportHistory()">Export history</button>
+        </div>
           <div class="table-container">
             <table>
               <thead>
@@ -54,7 +56,6 @@
               </tbody>
             </table>
           </div>
-        </div>
       </main>
     </div>
   </div>
@@ -114,6 +115,25 @@ export default {
         this.loading = false;
       }
     },
+    async exportHistory() {
+          try {
+              await axios.put(
+                  "http://127.0.0.1:5000/api/trekker/history/export-history",
+                  {},
+                  {
+                      headers: {
+                          Authorization: `Bearer ${localStorage.getItem("token")}`,
+                      },
+                  }
+              );
+
+              alert("Export started. The CSV will be sent to your email shortly.");
+          }
+          catch (err) {
+              console.error(err);
+              alert("Failed to start export.");
+          }
+      },
     getTrekImage(trek) {
       if (trek.photo) {
         return trek.photo.startsWith("http") ? trek.photo : `http://localhost:5000/${trek.photo.replace(/^\/+/, "")}`;
@@ -177,6 +197,32 @@ html, body {
     font-style: italic;
     color: #00027f;
     text-align: left;
+}
+.create-button {
+    padding: 11px 17px;
+    border: 1px solid #155eef;
+    border-radius: 5px;
+    background: #155eef;
+    color: #ffffff;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.create-button:hover {
+    background: #104bc4;
+}
+.page-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 15px;
+    margin-bottom: 10px;
+}
+
+.page-heading h1 {
+    padding-top: 0px;
+    margin: 0px !important;
 }
 .admin-profile {
     display: flex;
