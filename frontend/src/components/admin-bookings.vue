@@ -37,7 +37,7 @@
                 </tr>
               </thead>
               <tbody>
-                <tr v-for="booking in bookings" :key="booking.id">
+                <tr v-for="booking in filteredBookings" :key="booking.id">
                   <td>{{ booking.id }}</td>
                   <td>{{ booking.trekker_name }}</td>
                   <td>{{ booking.trek_name }}</td>
@@ -120,19 +120,27 @@ export default {
     };
   },
 
-  computed: {
-    filteredBookings() {
-      const value = this.search.toLowerCase();
+  
+computed: {
+  filteredBookings() {
+    const value = String(this.search || "").trim().toLowerCase();
 
-      return this.bookings.filter(booking =>
-        String(booking.id).toLowerCase().includes(value) ||
-        booking.trek_name.toLowerCase().includes(value) ||
-        booking.trek_location.toLowerCase().includes(value) ||
-        booking.trek_difficulty.toLowerCase().includes(value) ||
-        booking.trek_status.toLowerCase().includes(value)
+    return this.bookings.filter(booking => {
+      const searchableFields = [
+        booking.id,
+        booking.trekker_name,
+        booking.trek_name,
+        booking.booking_date,
+        booking.payment_status,
+        booking.status
+      ];
+
+      return searchableFields.some(field =>
+        String(field ?? "").toLowerCase().includes(value)
       );
-    }
-  },
+    });
+  }
+},
 
   mounted() {
     this.fetchBookingsList();

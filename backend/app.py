@@ -29,10 +29,6 @@ db.init_app(app)
 mail.init_app(app)
 CORS(app, supports_credentials=True)
 
-@app.route('/api/home')
-def home():
-    return "Welcome to the Home Page!"
-
 @app.route("/api/login", methods=["POST"])
 def login():
     data = request.get_json()
@@ -56,6 +52,12 @@ def login():
     if user.status != "Active":
         return jsonify({"success": False, "message": "Your account has been blacklisted. Please contact the administrator."}), 403
     token = create_access_token(identity=str(user.id))
+    treks = Trek.query.all()
+    for trek in treks:
+        if trek.end_date < today:
+            trek.status = "Closed"
+        if trek.start_date >= today:
+            trek.status = "Open"
     return jsonify({"success": True, "message": "Login successful.", "role": role, "token": token}), 200
 
 @app.route("/api/admin/dashboard", methods=["GET"])
@@ -110,6 +112,8 @@ def get_treks():
         available_slots = data.get("availableSlots")
         if not name or not location or not start_date_str or not end_date_str or not difficulty_level or price is None or available_slots is None:
             return jsonify({"success": False, "message": "All fields are required."}), 400
+        if datetime.strptime(start_date_str, "%Y-%m-%d").date() > datetime.strptime(end_date_str, "%Y-%m-%d").date():
+            return jsonify({"success": False, "message": "End date can't be before start date."}), 400
         new_trek = Trek(name=name, location=location, start_date=datetime.strptime(start_date_str, "%Y-%m-%d").date(), end_date=datetime.strptime(end_date_str, "%Y-%m-%d").date(), difficulty_level=difficulty_level, price=price, description=description, photo=photo, status=status, available_slots=available_slots)
         db.session.add(new_trek)
         db.session.commit()
@@ -138,6 +142,8 @@ def manage_trek(trek_id):
         trek.status = data.get("status", trek.status)
         trek.available_slots = data.get("availableSlots", trek.available_slots)
         TrekStaff.query.filter_by(trek_id=trek_id).delete()
+        if datetime.strptime(data.get("start_date"), "%Y-%m-%d").date() > datetime.strptime(data.get("end_date"), "%Y-%m-%d").date():
+            return jsonify({"success": False, "message": "End date can't be before start date."}), 400
         if trek.status != "Closed":
             assigned_staffs = data.get("assignedStaffs", [])
             new_assignments = [TrekStaff(trek_id=trek_id, staff_id=staff_id) for staff_id in assigned_staffs]
@@ -178,6 +184,8 @@ def manage_trekking_staff():
         new_staff = Staff(name=name, username=username, email=email, password=password_hash, contact=contact, experience=experience, specialization=specialization)
         db.session.add(new_staff)
         db.session.commit()
+        from tasks import staff_credentials
+        staff_credentials.delay(name, username, email, password)
         return jsonify({"success": True, "message": "Staff added successfully."}), 201
 
 @app.route("/api/admin/trekking-staff/<int:staff_id>/status", methods=["PUT"])
@@ -380,6 +388,9 @@ def update_participant(participant_id):
             trek.available_slots -= 1
         booking.status = status if status else booking.status
         booking.payment_status = payment_status if payment_status else booking.payment_status
+        if status == "Confirmed" and payment_status == "Completed":
+            from tasks import confirm_booking
+            confirm_booking.delay(participant_id)
         db.session.commit()
         return jsonify({"success": True, "message": f"Booking status updated to {booking.status}."}), 200
 

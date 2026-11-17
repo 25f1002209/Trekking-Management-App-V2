@@ -38,7 +38,7 @@
                 </tr>
               </thead>
               <tbody>
-                <tr v-for="trek in treks" :key="trek.id">
+                <tr v-for="trek in filteredTreks" :key="trek.id">
                   <td>{{ trek.id }}</td>
                   <td>{{ trek.name }}</td>
                   <td>{{ trek.location }}</td>
@@ -177,15 +177,15 @@ export default {
 
   computed: {
     filteredTreks() {
-      const value = this.search.toLowerCase();
+        const value = this.search.toLowerCase().trim();
 
-      return this.treks.filter(trek =>
-        String(trek.id).toLowerCase().includes(value) ||
-        trek.name.toLowerCase().includes(value) ||
-        trek.location.toLowerCase().includes(value) ||
-        trek.difficulty.toLowerCase().includes(value) ||
-        trek.status.toLowerCase().includes(value)
-      );
+        return this.treks.filter(trek =>
+            String(trek.id).toLowerCase().includes(value) ||
+            (trek.name || "").toLowerCase().includes(value) ||
+            (trek.location || "").toLowerCase().includes(value) ||
+            (trek.difficulty_level || "").toLowerCase().includes(value) ||
+            (trek.status || "").toLowerCase().includes(value)
+        );
     }
   },
 

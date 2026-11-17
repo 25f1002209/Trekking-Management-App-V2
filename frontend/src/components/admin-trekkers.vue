@@ -35,7 +35,7 @@
                 </tr>
               </thead>
               <tbody>
-                <tr v-for="trekker in trekkers" :key="trekker.id">
+                <tr v-for="trekker in filteredTrekkers" :key="trekker.id">
                   <td>{{ trekker.id }}</td>
                   <td>{{ trekker.name }}</td>
                   <td>{{ trekker.email }}</td>

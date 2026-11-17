@@ -1,2 +1,4 @@
 Booking ID,Trek Name,Booking Date,Trek Dates,Payment Status
-1,Everest,10-11-2026,10-11-2026 to 26-11-2026,Pending
+1,Everest,10-11-2026,10-11-2026 to 17-11-2026,Completed
+3,Kanchenjungha,12-11-2026,27-11-2026 to 30-11-2026,Completed
+5,Annapurna,18-11-2026,24-11-2026 to 28-11-2026,Completed

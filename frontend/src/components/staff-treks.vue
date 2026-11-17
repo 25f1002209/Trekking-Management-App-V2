@@ -38,7 +38,7 @@
                 </tr>
               </thead>
               <tbody>
-                <tr v-for="trek in treks" :key="trek.id">
+                <tr v-for="trek in filteredTreks" :key="trek.id">
                   <td>{{ trek.id }}</td>
                   <td>{{ trek.name }}</td>
                   <td>{{ trek.location }}</td>

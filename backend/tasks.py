@@ -89,3 +89,58 @@ def export_history(trekker_id):
         mail.send(msg)
         print(f"{filename} generated and emailed.")
         return filename
+
+@celery.task
+def confirm_booking(booking_id):
+    with app.app_context():
+        booking = Booking.query.get(booking_id)
+        trek = Trek.query.get(booking.trek_id)
+        trekker = Trekker.query.get(booking.trekker_id)
+        msg = Message(
+                    subject="Your Trek is Confirmed!",
+                    recipients=[trekker.email],
+                    body=f"""
+Hello {trekker.name},
+
+This is a reminder that your trek "{trek.name}" is confirmed.
+
+Trek Details:
+Booking ID: {booking.id}
+Trek Name: {trek.name}
+Location: {trek.location}
+Start Date: {trek.start_date.strftime("%d-%m-%Y")}
+End Date: {trek.end_date.strftime("%d-%m-%Y")}
+
+Please make sure you are prepared and arrive on time.
+
+Thank you for choosing Treknologia!
+
+Regards,
+Team Treknologia
+                """
+                    )
+        mail.send(msg)
+        return "Confirm booking sent."
+
+
+@celery.task
+def staff_credentials(name, username, email, password):
+    with app.app_context():
+        msg = Message(
+            subject="Login Credentials",
+            recipients=[email],
+            body=f"""
+Hello {name},
+
+Welcome to our organization. Your journey with Treknologia begins !!!
+
+Login Credentials:
+Username: {username}
+Password: {password}
+
+Regards,
+Team Treknologia
+"""
+        )
+        mail.send(msg)
+        return "Login Credentials sent to staff."
