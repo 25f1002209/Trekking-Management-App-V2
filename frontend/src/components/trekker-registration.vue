@@ -118,7 +118,7 @@ export default {
     display: flex;
     align-items: center;
     justify-content: center;
-    background-image: url("../assets/user-register.png");
+    background-image: url("https://res.cloudinary.com/oloewa3u/image/upload/v1794951790/user-register.png");
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
